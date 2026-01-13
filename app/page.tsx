@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, Leaf, Heart, Award } from "lucide-react"
-import { products } from "@/lib/products"
+
 import WhatsAppButton from "@/components/whatsapp-button"
 
 export default function HomePage() {
-  const featuredProducts = products.slice(0, 3)
+
 
   return (
     <div className="min-h-screen">
@@ -87,40 +87,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
-                <div className="relative overflow-hidden rounded-t-lg">
-                  <Image
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    width={400}
-                    height={300}
-                    className="object-cover h-64 w-full group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <Badge className="absolute top-4 left-4 bg-green-600">Bestseller</Badge>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-green-600">{product.price}</span>
-                    <span className="text-sm text-gray-500">{product.weight}</span>
-                  </div>
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    onClick={() => {
-                      const message = `Hi! I'm interested in ordering ${product.name} (${product.price}). Please provide more details.`
-                      window.open(
-                        `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-                        "_blank",
-                      )
-                    }}
-                  >
-                    Order on WhatsApp
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            
           </div>
 
           <div className="text-center mt-12">
