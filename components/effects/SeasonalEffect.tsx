@@ -2,7 +2,7 @@
 
 import SnowEffect from "./SnowEffect"
 import DiwaliEffect from "./DiwaliEffect"
-import ConfettiEffect from "./ConfettiEffect"
+
 import KiteEffect from "./KiteEffect"
 import GudiPadwaEffect from "./GudiPadwaEffect"
 import GaneshEffect from "./GaneshJiEffect"

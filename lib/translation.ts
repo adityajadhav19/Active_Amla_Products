@@ -1,4 +1,4 @@
-import { LogIn } from "lucide-react";
+
 
 export const translations = {
   en: {
