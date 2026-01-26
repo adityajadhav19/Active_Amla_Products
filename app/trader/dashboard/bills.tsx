@@ -120,8 +120,8 @@ export default function Bills() {
 
             {bill.status === "UNPAID" && (
               <div className="text-sm text-right">
-                <p>UPI: <b>activeamla@upi</b></p>
-                <p>Account: <b>XXXX-1234</b></p>
+                <p>UPI: <b>adityajadhavtemp1@oksbi</b></p>
+                <p>UPI NO.(Name :Aditya Jadhav): <b>7020513097</b></p>
               </div>
             )}
           </div>
