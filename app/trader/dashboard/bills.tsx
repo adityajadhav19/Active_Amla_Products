@@ -9,8 +9,8 @@ type Bill = {
   extraCharges: number;
   discount: number;
   totalAmount: number;
-  isPaid: boolean;
   notes?: string;
+  status: "PAID" | "UNPAID";
   order: {
     orderCode: string;
   };
@@ -18,18 +18,36 @@ type Bill = {
 
 export default function Bills() {
   const [bills, setBills] = useState<Bill[]>([]);
+  const [loading, setLoading] = useState(true);
 
   async function fetchBills() {
-    const res = await fetch("/api/traders/bills", {
-      credentials: "include",
-    });
-    const data = await res.json();
-    if (Array.isArray(data)) setBills(data);
+    try {
+      const res = await fetch("/api/traders/bills", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("FETCH_BILLS_FAILED:", res.status);
+        setBills([]);
+        return;
+      }
+
+      const data = await res.json();
+      if (Array.isArray(data)) setBills(data);
+    } catch (err) {
+      console.error("FETCH_BILLS_ERROR:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     fetchBills();
   }, []);
+
+  if (loading) {
+    return <p className="text-center py-6">Loading bills...</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -64,18 +82,43 @@ export default function Bills() {
             </p>
           )}
 
+          {/* PAYMENT ACTION */}
+          {bill.status === "UNPAID" && (
+            <button
+              onClick={async () => {
+                const res = await fetch(
+                  `/api/traders/bills/${bill.id}/pay`,
+                  {
+                    method: "PATCH",
+                    credentials: "include",
+                  }
+                );
+
+                if (res.ok) {
+                  fetchBills();
+                } else {
+                  alert("Failed to update payment status");
+                }
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded text-sm"
+            >
+              Mark as Paid
+            </button>
+          )}
+
+          {/* FOOTER */}
           <div className="flex justify-between items-center pt-2">
             <span
               className={`text-xs px-2 py-1 rounded ${
-                bill.isPaid
+                bill.status === "PAID"
                   ? "bg-green-100 text-green-700"
                   : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {bill.isPaid ? "Paid" : "Pending"}
+              {bill.status === "PAID" ? "Paid" : "Pending"}
             </span>
 
-            {!bill.isPaid && (
+            {bill.status === "UNPAID" && (
               <div className="text-sm text-right">
                 <p>UPI: <b>activeamla@upi</b></p>
                 <p>Account: <b>XXXX-1234</b></p>

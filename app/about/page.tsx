@@ -24,20 +24,20 @@ export default function AboutPage() {
       description: "Expanded our product range and started supplying to local markets across Maharashtra.",
     },
     {
-      year: "2005",
+      year: "2013",
       title: "Quality Certification",
       description:
         "Obtained food safety certifications and modernized our processing methods while maintaining traditional recipes.",
     },
     {
-      year: "2015",
+      year: "2017",
       title: "Digital Presence",
       description: "Launched our online presence and started serving customers across India.",
     },
     {
-      year: "2023",
+      year: "2025",
       title: "New Generation",
-      description: "Third generation joins the business, bringing fresh ideas while preserving our heritage.",
+      description: "Second generation joins the business, bringing fresh ideas while preserving our heritage.",
     },
   ]
 
@@ -89,7 +89,7 @@ export default function AboutPage() {
               A Legacy of <span className="text-green-600">Health & Tradition</span>
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed">
-              In 2010, Sanjiwani Ashok Jadhav had a simple yet powerful vision: to share the incredible health benefits
+              In 2010, Mr. and Mrs. Jadhav had a simple yet powerful vision: to share the incredible health benefits
               of Amla with families across Maharashtra. What started as a small home-based operation has grown into a
               trusted name in traditional Amla products.
             </p>
@@ -100,18 +100,18 @@ export default function AboutPage() {
             </p>
             <div className="grid grid-cols-2 gap-6 pt-4">
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">12+</div>
+                <div className="text-3xl font-bold text-green-600">16+</div>
                 <div className="text-gray-600">Years of Excellence</div>
               </div>
               <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600">3</div>
+                <div className="text-3xl font-bold text-yellow-600">2</div>
                 <div className="text-gray-600">Generations</div>
               </div>
             </div>
           </div>
           <div className="relative">
             <Image
-              src="/placeholder.svg?height=500&width=600"
+              src="/family_heritage.png?height=500&width=600"
               alt="Jadhav Family Heritage"
               width={600}
               height={500}
@@ -222,11 +222,11 @@ export default function AboutPage() {
             </div>
             <div className="relative">
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="/about.png?height=400&width=500"
                 alt="Fresh Amla Benefits"
                 width={500}
                 height={400}
-                className="rounded-xl shadow-lg"
+                className="rounded-xl "
               />
             </div>
           </div>
@@ -235,5 +235,5 @@ export default function AboutPage() {
 
       <WhatsAppButton />
     </div>
-  )
+)
 }

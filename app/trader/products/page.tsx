@@ -88,7 +88,6 @@ useEffect(() => {
           productId: product.id,
           name: product.name,
           quantity,
-          price: product.wholesalePrice,
         },
       ];
     });

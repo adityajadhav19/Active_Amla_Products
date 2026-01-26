@@ -14,14 +14,50 @@ export default function Profile() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+   const [form, setForm] = useState({
+    addressLine1: "",
+    addressLine2: "",
+    mapLink:"",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+  async function saveProfile() {
+    await fetch("/api/traders/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(form),
+    });
 
-  async function fetchProfile() {
+    alert("Profile updated");
+  }
+
+async function fetchProfile() {
+  try {
     const res = await fetch("/api/traders/profile", {
       credentials: "include",
     });
-    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("FETCH_PROFILE_FAILED:", res.status);
+      return;
+    }
+
+    const text = await res.text();
+
+    if (!text) {
+      console.warn("Empty profile response");
+      return;
+    }
+
+    const data = JSON.parse(text);
     setProfile(data);
+  } catch (err) {
+    console.error("FETCH_PROFILE_ERROR:", err);
   }
+}
+
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -92,34 +128,36 @@ export default function Profile() {
         >
           {loading ? "Updating..." : "Update Password"}
         </button>
+        <h2 className="text-lg font-semibold">Shop Address</h2>
+
+      {Object.keys(form).map((key) => (
+        <input
+          key={key}
+          placeholder={key}
+          value={(form as any)[key]}
+          onChange={(e) =>
+            setForm({ ...form, [key]: e.target.value })
+          }
+          className="w-full border px-3 py-2 rounded"
+        />
+      ))}
+
+      <button
+        onClick={saveProfile}
+        className="bg-green-600 text-white px-4 py-2 rounded"
+      >
+        Save
+      </button>
       </form>
+        
 
       {/* ORDER HISTORY */}
       <div className="bg-white p-4 rounded shadow">
         <h3 className="font-semibold mb-2">Order History</h3>
 
-        {profile.traderOrders.length === 0 && (
-          <p className="text-sm text-gray-500">
-            No orders yet.
-          </p>
-        )}
 
-        <ul className="space-y-2">
-          {profile.traderOrders.map((order: Order) => (
-            <li
-              key={order.id}
-              className="border p-2 rounded text-sm"
-            >
-              <div className="flex justify-between">
-                <span>#{order.orderCode}</span>
-                <span>{order.status}</span>
-              </div>
-              <p className="text-xs text-gray-500">
-                {new Date(order.createdAt).toLocaleString()}
-              </p>
-            </li>
-          ))}
-        </ul>
+
+       
       </div>
 
     </div>

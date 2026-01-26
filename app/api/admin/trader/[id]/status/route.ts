@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const admin = await requireAdmin();
+if (!admin) return 401;
+
   try {
     // ✅ Next.js 15 correct way
     const params = await context.params;

@@ -120,3 +120,110 @@
     @apply bg-background text-foreground;
   }
 }
+@keyframes kiteLeft {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(120px, -220px) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes kiteRight {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(-120px, -220px) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+.animate-kite-left {
+  animation: kiteLeft 18s ease-in-out infinite;
+}
+
+.animate-kite-left-slow {
+  animation: kiteLeft 26s ease-in-out infinite;
+}
+
+.animate-kite-right {
+  animation: kiteRight 18s ease-in-out infinite;
+}
+
+.animate-kite-right-slow {
+  animation: kiteRight 26s ease-in-out infinite;
+}
+/* Wrapper to center orb */
+.orb-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+/* Main 3D sphere */
+.orb {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #6fbf73, #2e7d32 70%);
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateOrb 12s infinite linear;
+  box-shadow:
+    inset -15px -20px 40px rgba(0, 0, 0, 0.3),
+    0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Highlight shine */
+.orb-highlight {
+  position: absolute;
+  top: 20%;
+  left: 25%;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(255,255,255,0.6), transparent 70%);
+  border-radius: 50%;
+}
+
+/* Bottom shadow depth */
+.orb-shadow {
+  position: absolute;
+  bottom: 10%;
+  right: 20%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(0,0,0,0.35), transparent 70%);
+  border-radius: 50%;
+}
+
+/* Rotation animation */
+@keyframes rotateOrb {
+  from { transform: rotateY(0deg) rotateX(10deg); }
+  to { transform: rotateY(360deg) rotateX(10deg); }
+}
+
+
+.animate-float {
+  animation: float linear infinite;
+}
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-30px) translateX(15px);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+

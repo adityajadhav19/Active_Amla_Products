@@ -1,34 +1,49 @@
-// lib/auth.ts
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const rawSecret = process.env.JWT_SECRET;
+
+if (!rawSecret) {
+  throw new Error("JWT_SECRET is not defined in environment variables");
+}
+
+// 👇 This makes TypeScript happy forever
+const JWT_SECRET: string = rawSecret;
 
 export type AuthUser = {
   id: number;
   name: string;
   role: "USER" | "TRADER" | "ADMIN";
+  isActive: boolean;
 };
 
-type TokenPayload = {
+/* ---------------- CREATE TOKEN ---------------- */
+export function createToken(payload: {
   id: number;
   role: "USER" | "TRADER" | "ADMIN";
-};
-
-export function createToken(payload: TokenPayload) {
-  if (!JWT_SECRET) throw new Error("JWT_SECRET missing");
+}) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 }
 
+/* ---------------- GET AUTH USER ---------------- */
 export async function getAuthUser(): Promise<AuthUser | null> {
-  const cookieStore = cookies();
-  const token = cookieStore.get("auth_token")?.value;
-
-  if (!token) return null;
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) return null;
+
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+    // 🔒 Runtime validation of token payload
+    if (
+      typeof decoded !== "object" ||
+      typeof decoded.id !== "number" ||
+      !["USER", "TRADER", "ADMIN"].includes(decoded.role as string)
+    ) {
+      return null;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
@@ -42,22 +57,25 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
     if (!user || !user.isActive) return null;
 
-    return {
-      id: user.id,
-      name: user.name,
-      role: user.role,
-    };
-  } catch {
+    return user;
+  } catch (err) {
+    console.error("AUTH_ERROR:", err);
     return null;
   }
 }
 
-export async function verifyAdmin() {
+/* ---------------- ROLE GUARDS ---------------- */
+export async function requireAdmin(): Promise<AuthUser | null> {
   const user = await getAuthUser();
-  return user?.role === "ADMIN";
+  return user?.role === "ADMIN" ? user : null;
 }
 
-export async function verifyTrader() {
+export async function requireTrader(): Promise<AuthUser | null> {
   const user = await getAuthUser();
-  return user?.role === "TRADER";
+  return user?.role === "TRADER" ? user : null;
+}
+
+export async function requireUser(): Promise<AuthUser | null> {
+  const user = await getAuthUser();
+  return user?.role === "USER" ? user : null;
 }

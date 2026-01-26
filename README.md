@@ -110,6 +110,17 @@ npm install
 DATABASE_URL=postgresql://user:password@localhost:5432/active_products
 JWT_SECRET=your_super_secret_key
 ```
+## 🔐 Environment Variables (Required)
+
+This project uses environment variables to store sensitive and business-specific information.
+
+### Business Contact Configuration
+Create a `.env.local` file in the root directory and add:
+
+```
+.env
+NEXT_PUBLIC_BUSINESS_WHATSAPP=91XXXXXXXXXX
+```
 
 # 4️⃣ Prisma Setup
 ```

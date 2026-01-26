@@ -1,10 +1,16 @@
 import cloudinary from "@/lib/cloudinary";
-import { verifyAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  if (!verifyAdmin(req)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+   const admin = await requireAdmin();
+  
+    if (!admin) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
   const formData = await req.formData();
   const file = formData.get("file") as File;

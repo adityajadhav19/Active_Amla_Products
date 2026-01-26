@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export async function POST(req: Request) {
+  const admin = await requireAdmin();
+if (!admin) return 401;
+
   try {
     const { name, email, phone, password } = await req.json();
 

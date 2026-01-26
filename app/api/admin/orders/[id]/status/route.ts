@@ -1,3 +1,4 @@
+// app/api/admin/orders/[id]/status/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";

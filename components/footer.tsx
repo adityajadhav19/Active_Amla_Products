@@ -63,12 +63,18 @@ export default function Footer() {
           {/* Products */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Our Products</h3>
+            <a href="/products">
             <ul className="space-y-2">
-              <li className="text-gray-400">Amla Candy (Sweet)</li>
+              <li className="text-gray-400">Amla Candy </li>
+              <li className="text-gray-400">Amla Supari</li>
+              <li className="text-gray-400">Amla Pickle</li>
+              <li className="text-gray-400">Amla Murabba</li>
+              <li className="text-gray-400">Amla Morawala</li>
               <li className="text-gray-400">Spicy Amla Candy</li>
               <li className="text-gray-400">Amla Juice</li>
               <li className="text-gray-400">Amla Churna</li>
             </ul>
+            </a>
           </div>
 
           {/* Contact Info */}
@@ -89,7 +95,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-green-400 flex-shrink-0" />
-                <div className="text-gray-400 text-sm">activeamla19@gmail.com</div>
+                <div className="text-gray-400 text-sm">info@activeproducts.in</div>
               </div>
             </div>
           </div>

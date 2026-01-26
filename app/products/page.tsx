@@ -1,7 +1,9 @@
+//app/products/page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
-
+import Image from "next/image";
 
 type Product = {
   id: number;
@@ -59,9 +61,11 @@ export default function ProductsPage() {
             className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden"
           >
             {product.imageUrl && (
-              <img
+              <Image
                 src={product.imageUrl}
                 alt={product.name}
+                width={400}
+                height={300}
                 className="h-48 w-full object-cover"
               />
             )}
@@ -82,7 +86,10 @@ export default function ProductsPage() {
               </p>
 
               <a
-                href={`https://wa.me/917020513097?text=I am interested in ${product.name}`}
+                
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP}?text=${encodeURIComponent(
+                  `I am interested in ${product.name}`
+                )}`}
                 target="_blank"
                 className="block text-center bg-green-600 text-white py-2 rounded hover:bg-green-700"
               >

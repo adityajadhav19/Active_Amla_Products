@@ -28,23 +28,24 @@ enum BillStatus {
 }
 
 model Bill {
-  id             Int      @id @default(autoincrement())
-  orderId        Int      @unique
+  id             Int        @id @default(autoincrement())
+  orderId        Int        @unique
 
   baseAmount     Float
-  transportFee   Float    @default(0)
-  extraCharges   Float    @default(0)
-  discount       Float    @default(0)
+  transportFee   Float      @default(0)
+  extraCharges   Float      @default(0)
+  discount       Float      @default(0)
   totalAmount    Float
 
   notes          String?
-  status         String   @default("PENDING") // PENDING | PAID
+  status         BillStatus @default(UNPAID)
 
-  order          Order    @relation(fields: [orderId], references: [id])
+  order          Order      @relation(fields: [orderId], references: [id])
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
+
 
 
 
@@ -55,6 +56,16 @@ model User {
   phone     String?
   password  String
   role      Role     @default(USER)
+
+  city      String?
+
+  // ✅ ADDRESS FIELDS
+  addressLine1 String?
+  addressLine2 String?
+  state        String?
+  pincode      String?
+
+  mapLink       String?
   isActive  Boolean  @default(true)
 
   userOrders   Order[] @relation("UserOrders")
@@ -63,6 +74,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 
 model Product {
   id             Int      @id @default(autoincrement())
@@ -73,7 +85,7 @@ model Product {
   retailPrice    Float
   wholesalePrice Float
   isActive       Boolean  @default(true)
-
+  inStock        Boolean  @default(true)
   orderItems     OrderItem[]
 
   createdAt      DateTime @default(now())
@@ -108,4 +120,13 @@ model OrderItem {
 
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+
+  createdAt DateTime @default(now())
 }

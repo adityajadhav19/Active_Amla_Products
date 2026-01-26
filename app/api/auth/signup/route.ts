@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createToken } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, phone } = await req.json();
+    const { name, email, password, phone, role, city } =
+      await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -14,6 +18,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // ✅ Email format validation
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Invalid email address" },
+        { status: 400 }
+      );
+    }
+
+    // ✅ Check duplicate email
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -27,37 +40,24 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // ❌ NEVER pass id here
     const user = await prisma.user.create({
       data: {
         name,
         email,
         phone,
         password: hashedPassword,
-        role: "USER", // 🔒 always USER
+        role: role ?? "USER",
+        city,
       },
     });
 
-    // auto login after signup
-    const token = createToken({
-      id: user.id,
-      role: user.role,
-    });
-
-    const res = NextResponse.json({
-      name: user.name,
-      role: user.role,
-    });
-
-    res.cookies.set("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    return res;
-  } catch (error) {
-    console.error("SIGNUP_ERROR:", error);
+    return NextResponse.json(
+      { message: "Signup successful", userId: user.id },
+      { status: 201 }
+    );
+  } catch (err) {
+    console.error("SIGNUP_ERROR:", err);
     return NextResponse.json(
       { error: "Signup failed" },
       { status: 500 }

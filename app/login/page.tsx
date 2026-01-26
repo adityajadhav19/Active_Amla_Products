@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -9,79 +10,86 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   async function handleLogin(e: React.FormEvent) {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  const res = await fetch("/api/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-  let data: any = null;
+    const data = await res.json();
 
-  // ✅ SAFETY: parse JSON only if present
-  const text = await res.text();
-  if (text) {
-    data = JSON.parse(text);
+    if (!res.ok) {
+      setError(data?.error || "Login failed");
+      setLoading(false);
+      return;
+    }
+
+    if (data?.role === "ADMIN") window.location.href = "/admin/dashboard";
+    else if (data?.role === "TRADER") window.location.href = "/trader/dashboard";
+    else window.location.href = "/user";
   }
-
-  console.log("LOGIN RESPONSE:", data);
-
-  if (!res.ok) {
-    setError(data?.error || "Login failed");
-    setLoading(false);
-    return;
-  }
-
-  // ✅ Redirect based on role
-  if (data?.role === "ADMIN") {
-    window.location.href = "/admin/dashboard";
-    return;
-  }
-
-  if (data?.role === "TRADER") {
-    window.location.href = "/trader/dashboard";
-    return;
-  }
-
-  window.location.href = "/user";
-}
-
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-semibold text-center">Login</h1>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50">
 
-        {error && (
-          <p className="text-red-600 text-sm text-center">{error}</p>
-        )}
+     
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
+      {/* 🔐 LOGIN FORM */}
+      <div className="flex items-center justify-center px-6 py-10">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md space-y-5">
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome Back 🌿
+            </h1>
+            <p className="text-sm text-gray-600">
+              Login to continue to Active Products
+            </p>
+          </div>
 
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full bg-green-700 text-white py-2 rounded"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800 transition disabled:opacity-60"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+
+          <p className="text-sm text-center text-gray-600">
+            Don’t have an account?{" "}
+            <Link href="/signup" className="text-green-700 font-medium hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

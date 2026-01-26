@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 export async function PUT(
   req: Request,
   context: { params: { id: string } }
 ) {
+  const admin = await requireAdmin();
+if (!admin) return 401;
+
   try {
     const { id } = context.params;
     const traderId = Number(id);

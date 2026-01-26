@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth";
 
 export async function GET() {
+  const admin = await requireAdmin();
+  if (!admin) return 401;
+
   try {
     console.log("LOGISTICS API HIT");
 
@@ -10,7 +14,7 @@ export async function GET() {
       where: {
         OR: [
           { status: OrderStatus.APPROVED },
-          { status: OrderStatus.SENT },
+          { status: OrderStatus.DISPATCHED },
         ],
       },
       include: {

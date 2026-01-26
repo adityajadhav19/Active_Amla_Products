@@ -87,16 +87,6 @@ export function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-
-  /* ---------------- WHOLESALE / TRADER PRODUCTS ---------------- */
-if (pathname.startsWith("/trader/products")) {
-  if (!user || (user.role !== "TRADER" && user.role !== "ADMIN")) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-}
-
-
-
 }
 
 /* ---------- APPLY MIDDLEWARE ---------- */

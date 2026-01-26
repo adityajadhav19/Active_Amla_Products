@@ -1,15 +1,23 @@
-// app/api/auth/me/route.ts
-export const dynamic = "force-dynamic";
-
 import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 
 export async function GET() {
-  const user = await getAuthUser();
+  try {
+    const user = await getAuthUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("ME_ROUTE_ERROR:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(user);
 }

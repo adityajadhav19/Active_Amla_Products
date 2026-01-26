@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -11,20 +12,17 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        password,
-      }),
+      body: JSON.stringify({ name, email, phone, password }),
       credentials: "include",
     });
 
@@ -32,72 +30,86 @@ export default function SignupPage() {
     setLoading(false);
 
     if (!res.ok) {
-      alert(data.error || "Signup failed");
+      setError(data.error || "Signup failed. Please try again.");
       return;
     }
 
-    // USER goes to home
-    router.push("/");
+    router.push("/login");
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[rgb(237,219,193)] px-4">
-      <form
-        onSubmit={handleSignup}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"
-      >
-        <h1 className="text-2xl font-semibold text-center">
-          Create Account
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-yellow-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
 
-        <input
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full border px-3 py-2 rounded"
-        />
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Create Account 🌱
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Join Active Products and explore natural goodness
+          </p>
+        </div>
 
-        <input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full border px-3 py-2 rounded"
-        />
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg text-center">
+            {error}
+          </div>
+        )}
 
-        <input
-          placeholder="Phone (optional)"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
+        {/* Form */}
+        <form onSubmit={handleSignup} className="space-y-4">
+          <input
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full border px-3 py-2 rounded"
-        />
+          <input
+            placeholder="Email address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-700 text-white py-2 rounded"
-        >
-          {loading ? "Creating account..." : "Sign Up"}
-        </button>
+          <input
+            placeholder="Phone (optional)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
 
+          <input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating account..." : "Sign Up"}
+          </button>
+        </form>
+
+        {/* Footer */}
         <p className="text-sm text-center text-gray-600">
           Already have an account?{" "}
-          <a href="/login" className="text-green-700 underline">
+          <Link href="/login" className="text-green-700 font-medium hover:underline">
             Login
-          </a>
+          </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
