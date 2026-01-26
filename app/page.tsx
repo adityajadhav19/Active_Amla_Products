@@ -3,7 +3,6 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, Leaf, Heart, Award } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -21,7 +20,7 @@ type Product = {
 export default function HomePage() {
 const [featured, setFeatured] = useState<Product[]>([])
 const [loading, setLoading] = useState(true);
-const [showGif, setShowGif] = useState(true);
+const [, setShowGif] = useState(true);
 
   useEffect(() => {
     async function fetchFeatured() {

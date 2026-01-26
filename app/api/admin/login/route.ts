@@ -1,54 +1,77 @@
-import { prisma } from "@/lib/prisma";
-import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { createToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
+    /* ---------------- VALIDATION ---------------- */
     if (!email || !password) {
-      return Response.json(
-        { message: "Email and password are required" },
+      return NextResponse.json(
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    // 1️⃣ Find admin
-    const admin = await prisma.admin.findUnique({
+    /* ---------------- FIND USER ---------------- */
+    const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (!admin) {
-      return Response.json(
-        { message: "Invalid credentials" },
+    if (!user) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    // 2️⃣ Verify password
-    const isValid = await bcrypt.compare(password, admin.password);
+    /* ---------------- CHECK PASSWORD ---------------- */
+    const isValid = await bcrypt.compare(password, user.password);
+
     if (!isValid) {
-      return Response.json(
-        { message: "Invalid credentials" },
+      return NextResponse.json(
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    // 3️⃣ Create JWT
-    const token = jwt.sign(
-      { role: "admin", adminId: admin.id },
-      process.env.JWT_SECRET!,
-      { expiresIn: "1d" }
-    );
+    /* ---------------- BLOCK INACTIVE USERS ---------------- */
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: "Account disabled. Contact support." },
+        { status: 403 }
+      );
+    }
 
-    // 4️⃣ Return token
-    return Response.json({ token });
-  } catch (error) {
-    console.error("Admin login error:", error);
-    return Response.json(
-      { message: "Internal server error" },
+    /* ---------------- CREATE JWT ---------------- */
+    const token = createToken({
+      id: user.id,
+      role: user.role, // USER | TRADER | ADMIN
+    });
+
+    /* ---------------- SEND RESPONSE + COOKIE ---------------- */
+    const res = NextResponse.json({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+    });
+
+    res.cookies.set("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return res;
+  } catch (err) {
+    console.error("LOGIN_ERROR:", err);
+    return NextResponse.json(
+      { error: "Something went wrong" },
       { status: 500 }
     );
   }
 }
-

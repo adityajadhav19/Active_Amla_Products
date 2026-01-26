@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Order = {
-  id: number;
-  orderCode: string;
-  status: string;
-  createdAt: string;
-};
+
 
 export default function Profile() {
   const [profile, setProfile] = useState<any>(null);

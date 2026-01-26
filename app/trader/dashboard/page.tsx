@@ -66,17 +66,7 @@ export default function TraderDashboardPage() {
     }
 
   }
-async function handleLogout() {
-  await fetch("/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
 
-  setUser(null);
-
-  // 🔴 FORCE NAVIGATION (IMPORTANT)
-  router.replace("/login");
-}
 
 
 

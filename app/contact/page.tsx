@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Phone, Mail, Clock, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import WhatsAppButton from "@/components/whatsapp-button";
 
 export default function ContactPage() {
@@ -57,7 +57,7 @@ export default function ContactPage() {
             Contact <span className="text-green-600">Us</span>
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Have questions or want to place an order? We’d love to hear from you.
+            Have questions or want to place an order? We&apos;d love to hear from you.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export default function ContactPage() {
             {/* SUCCESS ANIMATION */}
             {success && (
               <div className="animate-fade-in text-green-700 bg-green-50 border border-green-200 p-4 rounded-lg text-center">
-                ✅ Message sent successfully! We’ll contact you soon.
+                ✅ Message sent successfully! We&apos;ll contact you soon.
               </div>
             )}
 

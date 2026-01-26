@@ -34,7 +34,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
     if (!token) return null;
 
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET as string) as jwt.JwtPayload;
 
     // 🔒 Runtime validation of token payload
     if (

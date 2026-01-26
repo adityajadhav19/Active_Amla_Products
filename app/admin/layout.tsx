@@ -2,7 +2,6 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Star, ImageIcon, NotebookPen, MessageSquare } from "lucide-react";
 
 export default function AdminLayout({
   children,

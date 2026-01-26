@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 type Product = {
   id: number;
   name: string;
@@ -16,7 +15,7 @@ type CartItem = {
   productId: number;
   name: string;
   quantity: number;
-  price: number;
+  price: number; // wholesale price
 };
 
 export default function TraderProductsPage() {
@@ -26,46 +25,47 @@ export default function TraderProductsPage() {
   const [placingOrder, setPlacingOrder] = useState(false);
   const router = useRouter();
 
-useEffect(() => {
-  async function checkAuth() {
-    const res = await fetch("/api/auth/me", {
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      router.replace("/login");
-      return;
-    }
-
-    const data = await res.json();
-
-    if (data.role !== "TRADER" && data.role !== "ADMIN") {
-      router.replace("/");
-    }
-  }
-
-  checkAuth();
-}, [router]);
-
-
-  async function fetchProducts() {
-    try {
-      const res = await fetch("/api/products", {
+  /* ---------- AUTH CHECK ---------- */
+  useEffect(() => {
+    async function checkAuth() {
+      const res = await fetch("/api/auth/me", {
         credentials: "include",
       });
-      const data = await res.json();
-      if (Array.isArray(data)) setProducts(data);
-    } catch (error) {
-      console.error("FETCH_PRODUCTS_ERROR:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
+      if (!res.ok) {
+        router.replace("/login");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.role !== "TRADER" && data.role !== "ADMIN") {
+        router.replace("/");
+      }
+    }
+
+    checkAuth();
+  }, [router]);
+
+  /* ---------- FETCH PRODUCTS ---------- */
   useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products", {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) setProducts(data);
+      } catch (error) {
+        console.error("FETCH_PRODUCTS_ERROR:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchProducts();
   }, []);
 
+  /* ---------- ADD TO CART ---------- */
   function addToCart(product: Product, quantity: number) {
     if (quantity <= 0) return;
 
@@ -88,14 +88,15 @@ useEffect(() => {
           productId: product.id,
           name: product.name,
           quantity,
+          price: product.wholesalePrice,
         },
       ];
     });
   }
 
+  /* ---------- PLACE ORDER ---------- */
   async function placeBulkOrder() {
     if (cart.length === 0) return;
-
     setPlacingOrder(true);
 
     try {
@@ -155,16 +156,79 @@ useEffect(() => {
           {cart.map((item) => (
             <div
               key={item.productId}
-              className="flex justify-between text-sm"
+              className="flex justify-between items-center text-sm border-b pb-2"
             >
-              <span>
-                {item.name} × {item.quantity}
-              </span>
-              <span>
+              <div>
+                <p className="font-medium">{item.name}</p>
+
+                <div className="flex items-center gap-2 mt-1">
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev.map((p) =>
+                          p.productId === item.productId
+                            ? {
+                                ...p,
+                                quantity: Math.max(1, p.quantity - 1),
+                              }
+                            : p
+                        )
+                      )
+                    }
+                    className="px-2 bg-gray-200 rounded"
+                  >
+                    −
+                  </button>
+
+                  <span>{item.quantity}</span>
+
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev.map((p) =>
+                          p.productId === item.productId
+                            ? { ...p, quantity: p.quantity + 1 }
+                            : p
+                        )
+                      )
+                    }
+                    className="px-2 bg-gray-200 rounded"
+                  >
+                    +
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev.filter(
+                          (p) => p.productId !== item.productId
+                        )
+                      )
+                    }
+                    className="ml-3 text-red-600 text-xs"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <span className="font-medium">
                 ₹{item.quantity * item.price}
               </span>
             </div>
           ))}
+
+          {/* TOTAL */}
+          <div className="flex justify-between font-semibold pt-2">
+            <span>Total</span>
+            <span>
+              ₹
+              {cart.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0
+              )}
+            </span>
+          </div>
 
           <button
             onClick={placeBulkOrder}
@@ -218,7 +282,10 @@ function ProductCard({
             type="number"
             min={1}
             value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              if (val > 0) setQuantity(val);
+            }}
             className="w-20 border px-2 py-1 rounded"
           />
 
