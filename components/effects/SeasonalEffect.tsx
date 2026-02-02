@@ -42,7 +42,7 @@ if (day === 15 && month === 7) {
   //}
 
   // ❄️ Winter / Christmas (Dec)
-  if (month === 1) {
+  if (month === 11) {
     return <SnowEffect />
   }
 
