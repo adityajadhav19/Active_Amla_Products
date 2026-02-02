@@ -1,11 +1,11 @@
 // app/api/admin/product/upload/route.ts
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
+import { UploadApiResponse } from "cloudinary";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { requireAdmin } from "@/lib/auth";
-
+import { csrfProtect } from "@/lib/csrf-protect";
 /* ---------------- CLOUDINARY CONFIG ---------------- */
 
 cloudinary.config({
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    await csrfProtect();
     const formData = await req.formData();
     const file = formData.get("file");
 
@@ -64,19 +65,23 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
+   const uploadResult: UploadApiResponse = await new Promise(
+  (resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
         {
           folder: "active-products/products",
           resource_type: "image",
         },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+        (error: Error | undefined, result?: UploadApiResponse) => {
+          if (error) return reject(error);
+          if (!result) return reject(new Error("Upload failed"));
+          resolve(result);
         }
-      ).end(buffer);
-    });
-
+      )
+      .end(buffer);
+  }
+);
     return NextResponse.json({
       imageUrl: uploadResult.secure_url,
       publicId: uploadResult.public_id,

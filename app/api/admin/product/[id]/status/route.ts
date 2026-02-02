@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 
 export async function PATCH(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ Next 15 correct type
 ) {
   // 🔐 Admin validation
   const admin = await requireAdmin();
@@ -12,9 +12,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // ✅ IMPORTANT: await params
-  const params = await context.params;
-  const productId = Number(params.id);
+  // ✅ MUST await params
+  const { id } = await context.params;
+  const productId = Number(id);
 
   if (Number.isNaN(productId)) {
     return NextResponse.json(
@@ -32,10 +32,18 @@ export async function PATCH(
     );
   }
 
-  await prisma.product.update({
-    where: { id: productId },
-    data: { isActive },
-  });
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { isActive },
+    });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("PRODUCT_STATUS_UPDATE_ERROR:", err);
+    return NextResponse.json(
+      { error: "Failed to update status" },
+      { status: 500 }
+    );
+  }
 }

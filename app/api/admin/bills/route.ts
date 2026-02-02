@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-
+import { csrfProtect } from "@/lib/csrf-protect";
 /* ---------------- GET ALL BILLS (ADMIN) ---------------- */
 
 export async function GET() {
@@ -39,6 +39,7 @@ export async function GET() {
 /* ---------------- CREATE BILL (ADMIN) ---------------- */
 
 export async function POST(req: Request) {
+  
   const admin = await requireAdmin();
 
   if (!admin) {
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    await csrfProtect();
     const {
       orderId,
       baseAmount,
@@ -86,6 +88,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
+    
     console.error("CREATE_BILL_ERROR:", error);
 
     return NextResponse.json(

@@ -4,14 +4,17 @@ import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ Next 15 format
 ) {
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const productId = Number(params.id);
+  // ✅ MUST await params
+  const { id } = await context.params;
+  const productId = Number(id);
+
   if (Number.isNaN(productId)) {
     return NextResponse.json(
       { error: "Invalid product ID" },
@@ -28,11 +31,7 @@ export async function PUT(
   const retailPrice = Number(body.retailPrice);
   const wholesalePrice = Number(body.wholesalePrice);
 
-  if (
-    !name ||
-    Number.isNaN(retailPrice) ||
-    Number.isNaN(wholesalePrice)
-  ) {
+  if (!name || Number.isNaN(retailPrice) || Number.isNaN(wholesalePrice)) {
     return NextResponse.json(
       { error: "Invalid or missing fields" },
       { status: 400 }

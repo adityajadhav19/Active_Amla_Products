@@ -6,39 +6,59 @@ import { getAuthUser } from "@/lib/auth";
 
 export async function PATCH(
   req: Request,
-  context: { params: { id: string } }
-) {
-  const user = await getAuthUser();
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  try {
+    const user = await getAuthUser();
 
-  if (!user || user.role !== "TRADER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { id } = await context.params;
-  const billId = Number(id);
+    if (!user || user.role !== "TRADER") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-  // Ensure bill belongs to this trader
-  const bill = await prisma.bill.findUnique({
-    where: { id: billId },
-    include: {
-      order: true,
-    },
-  });
+    // ✅ Next 15 params fix
+    const { id } = await context.params;
+    const billId = Number(id);
 
-  if (!bill || bill.order.traderId !== user.id) {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
-  }
+    if (Number.isNaN(billId)) {
+      return NextResponse.json(
+        { error: "Invalid bill ID" },
+        { status: 400 }
+      );
+    }
 
-  const updatedBill = await prisma.bill.update({
-    where: { id: billId },
-    data: {
-      status: "PAID",
-      order: {
-        update: {
-          status: "PROCESSING",
+    // 🔍 Ensure bill belongs to trader
+    const bill = await prisma.bill.findUnique({
+      where: { id: billId },
+      include: { order: true },
+    });
+
+    if (!bill || bill.order.traderId !== user.id) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
+
+    // 💰 Mark paid + move order to processing
+    const updatedBill = await prisma.bill.update({
+      where: { id: billId },
+      data: {
+        status: "PAID",
+        order: {
+          update: { status: "PROCESSING" },
         },
       },
-    },
-  });
+    });
 
-  return NextResponse.json({ success: true, bill: updatedBill });
+    return NextResponse.json({ success: true, bill: updatedBill });
+  } catch (error) {
+    console.error("TRADER_PAY_BILL_ERROR:", error);
+    return NextResponse.json(
+      { error: "Failed to update bill" },
+      { status: 500 }
+    );
+  }
 }

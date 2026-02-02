@@ -1,6 +1,6 @@
 //app/admin/dashboard/bills.tsx
 "use client";
-
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 import { useEffect, useState } from "react";
 
 type Bill = {
@@ -53,7 +53,7 @@ export default function AdminBills() {
   }, []);
 
   async function markAsPaid(billId: number) {
-    await fetch(`/api/admin/bills/${billId}/pay`, {
+    await fetchWithCSRF(`/api/admin/bills/${billId}/pay`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -75,40 +75,39 @@ export default function AdminBills() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Bills</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Bills</h2>
 
       {bills.map((bill) => (
         <div
           key={bill.id}
-          className="bg-white p-4 rounded shadow space-y-2"
+          className="bg-white dark:bg-gray-900 border border-transparent dark:border-gray-700 p-4 rounded shadow space-y-2"
         >
           <div className="flex justify-between">
             <div>
-              <p className="font-semibold">
+              <p className="font-semibold text-gray-900 dark:text-white">
                 Order #{bill.order.orderCode}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Trader: {bill.order.trader?.name ?? "—"}
               </p>
             </div>
 
             <span
-              className={`text-xs px-2 py-1 rounded ${
-                bill.status === "PAID"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
+              className={`text-xs px-2 py-1 rounded ${bill.status === "PAID"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400"
+                }`}
             >
               {bill.status}
             </span>
           </div>
 
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             <p>Base: ₹{bill.baseAmount}</p>
             <p>Transport: ₹{bill.transportFee}</p>
             <p>Extra: ₹{bill.extraCharges}</p>
             <p>Discount: ₹{bill.discount}</p>
-            <p className="font-semibold">
+            <p className="font-semibold text-gray-900 dark:text-white">
               Total: ₹{bill.totalAmount}
             </p>
           </div>
@@ -116,7 +115,7 @@ export default function AdminBills() {
           {bill.status === "PENDING" && (
             <button
               onClick={() => markAsPaid(bill.id)}
-              className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
             >
               Mark as Paid
             </button>
@@ -124,5 +123,6 @@ export default function AdminBills() {
         </div>
       ))}
     </div>
+
   );
 }

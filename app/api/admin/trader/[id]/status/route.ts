@@ -1,20 +1,27 @@
+// app/api/admin/trader/[id]/status/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function PATCH(
   req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+  context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
+): Promise<Response> {
   const admin = await requireAdmin();
-if (!admin) return 401;
+
+  // 🔒 Proper Response return
+  if (!admin) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   try {
-    // ✅ Next.js 15 correct way
-    const params = await context.params;
-    const traderId = Number(params.id);
+    const { id } = await context.params;
+    const traderId = Number(id);
 
-    if (isNaN(traderId)) {
+    if (Number.isNaN(traderId)) {
       return NextResponse.json(
         { error: "Invalid trader ID" },
         { status: 400 }
@@ -23,15 +30,30 @@ if (!admin) return 401;
 
     const { isActive } = await req.json();
 
+    if (typeof isActive !== "boolean") {
+      return NextResponse.json(
+        { error: "Invalid status value" },
+        { status: 400 }
+      );
+    }
+
     const trader = await prisma.user.update({
       where: { id: traderId },
       data: { isActive },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        isActive: true,
+      },
     });
 
     return NextResponse.json({
-      message: "Trader status updated successfully",
+      message: "Trader status updated",
       trader,
     });
+
   } catch (error) {
     console.error("TRADER_STATUS_ERROR:", error);
     return NextResponse.json(

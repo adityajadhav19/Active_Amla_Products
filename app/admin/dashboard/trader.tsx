@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 
 type Trader = {
   id: number;
@@ -42,7 +43,7 @@ export default function Trader() {
     e.preventDefault();
     setLoading(true);
 
-    await fetch("/api/admin/trader/create", {
+    await fetchWithCSRF("/api/admin/trader/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, phone, password }),
@@ -64,7 +65,7 @@ export default function Trader() {
     e.preventDefault();
     if (!editingTrader) return;
 
-    await fetch(`/api/admin/trader/${editingTrader.id}`, {
+    await fetchWithCSRF(`/api/admin/trader/${editingTrader.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -81,7 +82,7 @@ export default function Trader() {
   /* ---------------- ENABLE / DISABLE ---------------- */
 
   async function toggleStatus(id: number, isActive: boolean) {
-    await fetch(`/api/admin/trader/${id}/status`, {
+    await fetchWithCSRF(`/api/admin/trader/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive }),
@@ -94,11 +95,13 @@ export default function Trader() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Traders</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Traders
+        </h2>
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-green-700 text-white px-4 py-2 rounded"
+          className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
         >
           + Add Trader
         </button>
@@ -108,14 +111,14 @@ export default function Trader() {
       {showForm && (
         <form
           onSubmit={handleCreateTrader}
-          className="bg-white p-4 rounded-lg shadow space-y-3 max-w-md"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow space-y-3 max-w-md"
         >
           <input
             placeholder="Trader Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
           />
 
           <input
@@ -123,14 +126,14 @@ export default function Trader() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
           />
 
           <input
             placeholder="Phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
           />
 
           <input
@@ -139,14 +142,14 @@ export default function Trader() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
           />
 
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={loading}
-              className="bg-green-700 text-white px-4 py-2 rounded"
+              className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
             >
               {loading ? "Creating..." : "Create"}
             </button>
@@ -154,7 +157,7 @@ export default function Trader() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="border px-4 py-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded"
             >
               Cancel
             </button>
@@ -167,20 +170,27 @@ export default function Trader() {
         {traders.map((trader) => (
           <div
             key={trader.id}
-            className="bg-white p-4 rounded-lg shadow space-y-2"
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow space-y-2"
           >
-            <h3 className="font-semibold">{trader.name}</h3>
-            <p className="text-sm text-gray-600">{trader.email}</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              {trader.name}
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {trader.email}
+            </p>
+
             {trader.phone && (
-              <p className="text-sm text-gray-600">{trader.phone}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {trader.phone}
+              </p>
             )}
 
             <span
-              className={`inline-block text-xs px-2 py-1 rounded ${
-                trader.isActive
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
+              className={`inline-block text-xs px-2 py-1 rounded ${trader.isActive
+                  ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                  : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                }`}
             >
               {trader.isActive ? "Active" : "Disabled"}
             </span>
@@ -188,16 +198,14 @@ export default function Trader() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setEditingTrader(trader)}
-                className="border px-3 py-1 rounded text-sm"
+                className="border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded text-sm"
               >
                 Edit
               </button>
 
               <button
-                onClick={() =>
-                  toggleStatus(trader.id, !trader.isActive)
-                }
-                className="border px-3 py-1 rounded text-sm"
+                onClick={() => toggleStatus(trader.id, !trader.isActive)}
+                className="border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded text-sm"
               >
                 {trader.isActive ? "Disable" : "Enable"}
               </button>
@@ -210,16 +218,18 @@ export default function Trader() {
       {editingTrader && (
         <form
           onSubmit={handleUpdateTrader}
-          className="bg-white p-4 rounded-lg shadow space-y-3 max-w-md border"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg shadow space-y-3 max-w-md"
         >
-          <h3 className="font-semibold">Edit Trader</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">
+            Edit Trader
+          </h3>
 
           <input
             value={editingTrader.name}
             onChange={(e) =>
               setEditingTrader({ ...editingTrader, name: e.target.value })
             }
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
             required
             placeholder="name"
           />
@@ -229,7 +239,7 @@ export default function Trader() {
             onChange={(e) =>
               setEditingTrader({ ...editingTrader, email: e.target.value })
             }
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
             required
             placeholder="email"
           />
@@ -239,14 +249,14 @@ export default function Trader() {
             onChange={(e) =>
               setEditingTrader({ ...editingTrader, phone: e.target.value })
             }
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 rounded"
             placeholder="phone"
           />
 
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-green-700 text-white px-4 py-2 rounded"
+              className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
             >
               Save
             </button>
@@ -254,7 +264,7 @@ export default function Trader() {
             <button
               type="button"
               onClick={() => setEditingTrader(null)}
-              className="border px-4 py-2 rounded"
+              className="border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded"
             >
               Cancel
             </button>
@@ -262,5 +272,6 @@ export default function Trader() {
         </form>
       )}
     </div>
+
   );
 }

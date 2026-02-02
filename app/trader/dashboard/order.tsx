@@ -68,21 +68,24 @@ export default function Orders() {
       {orders.map((order) => (
         <div
           key={order.id}
-          className="bg-white p-4 rounded shadow"
+          className="bg-white dark:bg-gray-900 p-4 rounded shadow border border-gray-200 dark:border-gray-800"
         >
-          <p className="font-semibold">
+          <p className="font-semibold text-gray-900 dark:text-gray-100">
             Order #{order.orderCode}
           </p>
-          <p className="text-sm text-gray-600">
+
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Status: {order.status}
           </p>
+
           {order.totalAmount && (
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
               Amount: ₹{order.totalAmount}
             </p>
           )}
         </div>
       ))}
     </div>
+
   );
 }

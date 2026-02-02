@@ -1,81 +1,74 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-const rawSecret = process.env.JWT_SECRET;
-
-if (!rawSecret) {
-  throw new Error("JWT_SECRET is not defined in environment variables");
-}
-
-// 👇 This makes TypeScript happy forever
-const JWT_SECRET: string = rawSecret;
-
-export type AuthUser = {
+export type TokenPayload = {
   id: number;
-  name: string;
   role: "USER" | "TRADER" | "ADMIN";
-  isActive: boolean;
 };
 
-/* ---------------- CREATE TOKEN ---------------- */
-export function createToken(payload: {
-  id: number;
-  role: "USER" | "TRADER" | "ADMIN";
-}) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+const JWT_SECRET = process.env.JWT_SECRET!;
+
+/* ================= CREATE TOKEN ================= */
+export function createToken(payload: TokenPayload) {
+  return jwt.sign(payload, JWT_SECRET, {
+    algorithm: "HS256",
+    expiresIn: "7d",
+  });
 }
 
-/* ---------------- GET AUTH USER ---------------- */
-export async function getAuthUser(): Promise<AuthUser | null> {
+/* ================= VERIFY TOKEN ONLY ================= */
+/* Used by middleware or lightweight checks */
+export async function verifyAuth(): Promise<TokenPayload | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
     if (!token) return null;
 
-    const decoded = jwt.verify(token, JWT_SECRET as string) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
 
-    // 🔒 Runtime validation of token payload
-    if (
-      typeof decoded !== "object" ||
-      typeof decoded.id !== "number" ||
-      !["USER", "TRADER", "ADMIN"].includes(decoded.role as string)
-    ) {
-      return null;
-    }
+/* ================= GET FULL USER FROM DB ================= */
+/* Used in API routes */
+export async function getAuthUser() {
+  try {
+    const payload = await verifyAuth();
+    if (!payload) return null;
 
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        isActive: true,
-      },
+      where: { id: payload.id },
     });
 
     if (!user || !user.isActive) return null;
 
     return user;
-  } catch (err) {
-    console.error("AUTH_ERROR:", err);
+  } catch {
     return null;
   }
 }
 
-/* ---------------- ROLE GUARDS ---------------- */
-export async function requireAdmin(): Promise<AuthUser | null> {
+/* ================= REQUIRE ANY USER ================= */
+export async function requireUser() {
   const user = await getAuthUser();
-  return user?.role === "ADMIN" ? user : null;
+  if (!user) return null;
+  return user;
 }
 
-export async function requireTrader(): Promise<AuthUser | null> {
+/* ================= REQUIRE ADMIN ================= */
+export async function requireAdmin() {
   const user = await getAuthUser();
-  return user?.role === "TRADER" ? user : null;
+  if (!user || user.role !== "ADMIN") return null;
+  return user;
 }
 
-export async function requireUser(): Promise<AuthUser | null> {
+/* ================= REQUIRE TRADER ================= */
+export async function requireTrader() {
   const user = await getAuthUser();
-  return user?.role === "USER" ? user : null;
+  if (!user || (user.role !== "TRADER" && user.role !== "ADMIN")) return null;
+  return user;
 }

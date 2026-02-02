@@ -7,6 +7,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Bill {
+  id           Int        @id @default(autoincrement())
+  orderId      Int        @unique
+  baseAmount   Float
+  transportFee Float      @default(0)
+  extraCharges Float      @default(0)
+  discount     Float      @default(0)
+  totalAmount  Float
+  notes        String?
+  status       BillStatus @default(UNPAID)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  order        Order      @relation(fields: [orderId], references: [id])
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  phone        String?
+  password     String
+  role         Role     @default(USER)
+  city         String?
+  addressLine1 String?
+  addressLine2 String?
+  state        String?
+  pincode      String?
+  mapLink      String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  traderOrders Order[]  @relation("TraderOrders")
+  userOrders   Order[]  @relation("UserOrders")
+}
+
+model Product {
+  id             Int         @id @default(autoincrement())
+  name           String
+  slug           String      @unique
+  description    String?
+  imageUrl       String?
+  retailPrice    Float
+  wholesalePrice Float
+  isActive       Boolean     @default(true)
+  inStock        Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderCode   String      @unique
+  status      OrderStatus @default(REQUESTED)
+  userId      Int?
+  traderId    Int?
+  totalAmount Float?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  bill        Bill?
+  trader      User?       @relation("TraderOrders", fields: [traderId], references: [id])
+  user        User?       @relation("UserOrders", fields: [userId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   USER
   TRADER
@@ -25,108 +108,4 @@ enum OrderStatus {
 enum BillStatus {
   UNPAID
   PAID
-}
-
-model Bill {
-  id             Int        @id @default(autoincrement())
-  orderId        Int        @unique
-
-  baseAmount     Float
-  transportFee   Float      @default(0)
-  extraCharges   Float      @default(0)
-  discount       Float      @default(0)
-  totalAmount    Float
-
-  notes          String?
-  status         BillStatus @default(UNPAID)
-
-  order          Order      @relation(fields: [orderId], references: [id])
-
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-}
-
-
-
-
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  phone     String?
-  password  String
-  role      Role     @default(USER)
-
-  city      String?
-
-  // ✅ ADDRESS FIELDS
-  addressLine1 String?
-  addressLine2 String?
-  state        String?
-  pincode      String?
-
-  mapLink       String?
-  isActive  Boolean  @default(true)
-
-  userOrders   Order[] @relation("UserOrders")
-  traderOrders Order[] @relation("TraderOrders")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-
-model Product {
-  id             Int      @id @default(autoincrement())
-  name           String
-  slug           String   @unique
-  description    String?
-  imageUrl       String?
-  retailPrice    Float
-  wholesalePrice Float
-  isActive       Boolean  @default(true)
-  inStock        Boolean  @default(true)
-  orderItems     OrderItem[]
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model Order {
-  id          Int         @id @default(autoincrement())
-  orderCode   String      @unique
-  status      OrderStatus @default(REQUESTED)
-
-  userId      Int?
-  traderId    Int?
-
-  user        User? @relation("UserOrders", fields: [userId], references: [id])
-  trader      User? @relation("TraderOrders", fields: [traderId], references: [id])
-
-  items       OrderItem[]
-  totalAmount Float?
-  bill        Bill?       // 👈 THIS LINE IS REQUIRED
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model OrderItem {
-  id        Int      @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  quantity  Int
-  price     Float
-
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model ContactMessage {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  message   String
-
-  createdAt DateTime @default(now())
 }

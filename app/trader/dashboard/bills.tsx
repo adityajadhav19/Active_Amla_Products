@@ -51,33 +51,37 @@ export default function Bills() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">My Bills</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        My Bills
+      </h2>
 
       {bills.length === 0 && (
-        <p className="text-gray-500">No bills available.</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          No bills available.
+        </p>
       )}
 
       {bills.map((bill) => (
         <div
           key={bill.id}
-          className="bg-white p-4 rounded shadow space-y-2"
+          className="bg-white dark:bg-gray-900 p-4 rounded shadow space-y-2 border border-gray-200 dark:border-gray-800"
         >
-          <p className="font-semibold">
+          <p className="font-semibold text-gray-900 dark:text-gray-100">
             Order #{bill.order.orderCode}
           </p>
 
-          <div className="text-sm text-gray-700 space-y-1">
+          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
             <p>Base Amount: ₹{bill.baseAmount}</p>
             <p>Transport: ₹{bill.transportFee}</p>
             <p>Extra Charges: ₹{bill.extraCharges}</p>
             <p>Discount: ₹{bill.discount}</p>
-            <p className="font-bold text-green-700">
+            <p className="font-bold text-green-700 dark:text-green-400">
               Total: ₹{bill.totalAmount}
             </p>
           </div>
 
           {bill.notes && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Note: {bill.notes}
             </p>
           )}
@@ -88,10 +92,7 @@ export default function Bills() {
               onClick={async () => {
                 const res = await fetch(
                   `/api/traders/bills/${bill.id}/pay`,
-                  {
-                    method: "PATCH",
-                    credentials: "include",
-                  }
+                  { method: "PATCH", credentials: "include" }
                 );
 
                 if (res.ok) {
@@ -100,7 +101,7 @@ export default function Bills() {
                   alert("Failed to update payment status");
                 }
               }}
-              className="bg-green-600 text-white px-4 py-2 rounded text-sm"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition"
             >
               Mark as Paid
             </button>
@@ -109,24 +110,28 @@ export default function Bills() {
           {/* FOOTER */}
           <div className="flex justify-between items-center pt-2">
             <span
-              className={`text-xs px-2 py-1 rounded ${
-                bill.status === "PAID"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
+              className={`text-xs px-2 py-1 rounded ${bill.status === "PAID"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
+                }`}
             >
               {bill.status === "PAID" ? "Paid" : "Pending"}
             </span>
 
             {bill.status === "UNPAID" && (
-              <div className="text-sm text-right">
-                <p>UPI: <b>adityajadhavtemp1@oksbi</b></p>
-                <p>UPI NO.(Name :Aditya Jadhav): <b>7020513097</b></p>
+              <div className="text-sm text-right text-gray-800 dark:text-gray-200">
+                <p>
+                  UPI: <b>adityajadhavtemp1@oksbi</b>
+                </p>
+                <p>
+                  UPI NO.(Name :Aditya Jadhav): <b>7020513097</b>
+                </p>
               </div>
             )}
           </div>
         </div>
       ))}
     </div>
+
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+
 type Message = {
   id: number;
   name: string;
@@ -53,36 +54,43 @@ export default function AdminMessages() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Contact Messages</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Contact Messages
+      </h2>
 
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className="bg-white border rounded-lg p-4 shadow-sm space-y-2"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm space-y-2"
         >
           <div className="flex justify-between items-start">
             <div>
-              <p className="font-semibold">{msg.name}</p>
-              <p className="text-sm text-gray-600">{msg.email}</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {msg.name}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {msg.email}
+              </p>
             </div>
 
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
               {new Date(msg.createdAt).toLocaleString()}
             </span>
           </div>
 
-          <p className="text-gray-700 text-sm whitespace-pre-line">
+          <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">
             {msg.message}
           </p>
 
           <a
             href={`mailto:${msg.email}`}
-            className="inline-block text-sm text-green-700 hover:underline"
+            className="inline-block text-sm text-green-700 dark:text-green-400 hover:underline"
           >
             Reply via Email
           </a>
         </div>
       ))}
     </div>
+
   );
 }

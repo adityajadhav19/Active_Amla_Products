@@ -15,7 +15,7 @@ export default function OrderNowButton({
 }: Props) {
   const handleClick = () => {
     const message =
-`Hello Royal Cake Studio 
+      `Hello Royal Cake Studio 
 
 I would like to order the following product:
 
@@ -36,11 +36,10 @@ Thank you!`;
     <button
       disabled={!inStock}
       onClick={handleClick}
-      className={`mt-5 w-full px-4 py-2 rounded text-white transition ${
-        inStock
-          ? "bg-[rgb(139,69,19)] hover:scale-105"
-          : "bg-gray-400 cursor-not-allowed"
-      }`}
+      className={`mt-5 w-full px-4 py-2 rounded text-white transition duration-200 ${inStock
+          ? "bg-[rgb(139,69,19)] hover:scale-105 hover:shadow-md dark:bg-amber-700 dark:hover:bg-amber-600"
+          : "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+        }`}
     >
       {inStock ? "Order Now" : "Out of Stock"}
     </button>

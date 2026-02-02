@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-
+import { csrfProtect } from "@/lib/csrf-protect";
 export async function GET() {
   try {
     const user = await requireAdmin();
@@ -19,7 +19,7 @@ export async function GET() {
     });
 
     return NextResponse.json(products);
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch products" },
       { status: 500 }
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    await csrfProtect();
     const {
       name,
       slug,

@@ -1,13 +1,43 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import Image from "next/image"
 export default function GudiPadwaEffect() {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-10">
-      {/* Toran (top decoration) */}
-      <div className="absolute top-0 left-0 w-full h-10 bg-gradient-to-r from-green-700 via-yellow-500 to-green-700 opacity-80" />
+  const [isDark, setIsDark] = useState(false)
 
-      {/* Auspicious glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,215,0,0.12),transparent_60%)]" />
-    </div>
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains("dark"))
+    }
+
+    checkTheme()
+
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true })
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <>
+      {/* 🌿 TORAN FULL WIDTH RESPONSIVE */}
+      <div className="pointer-events-none fixed left-0 w-full z-50 top-[60px] md:top-[48px]">
+        <Image
+          src="/toran.png"
+          alt="Toran"
+          width={2000}
+          height={150}
+          className="w-full h-auto object-cover"
+          priority
+        />
+      </div>
+
+      {/* 🪔 GUDHI PLACEHOLDER (LEFT SIDE) */}
+   
+
+      {/* ✨ Soft festive glow */}
+      <div className="pointer-events-none fixed inset-0 z-30 bg-[radial-gradient(circle,rgba(255,215,0,0.08),transparent_65%)]" />
+    </>
+
   )
 }

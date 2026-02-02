@@ -2,9 +2,15 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 export async function POST(req: Request) {
   const user = await getAuthUser();
+  try {
+    await csrfProtect();
+  } catch {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
 
   if (!user || user.role !== "TRADER") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

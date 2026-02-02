@@ -32,17 +32,17 @@ if (day === 15 && month === 7) {
   }
 
   // 🪔 Ganesh Chaturthi (Aug–Sep)
-  if (month === 7 || month === 8) {
-    return <GaneshEffect />
-  }
+  //if (month === 7 || month === 8) {
+  //  return <GaneshEffect />
+  //}
 
   // 🪔 Diwali (Oct–Nov)
-  if (month === 9 || month === 10) {
-    return <DiwaliEffect />
-  }
+  //if (month === 1 || month === 10) {
+  //  return <DiwaliEffect />
+  //}
 
   // ❄️ Winter / Christmas (Dec)
-  if (month === 11) {
+  if (month === 1) {
     return <SnowEffect />
   }
 

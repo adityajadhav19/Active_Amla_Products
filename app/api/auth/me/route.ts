@@ -1,23 +1,19 @@
+// app/api/auth/me/route.ts
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/auth";
+import { verifyAuth } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const user = await getAuthUser();
+    const user = await verifyAuth(); // 🔐 central auth logic
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     return NextResponse.json(user);
-  } catch (error) {
-    console.error("ME_ROUTE_ERROR:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch user" },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 }

@@ -16,94 +16,56 @@ type AuthUser = {
 
 export default function TraderDashboardPage() {
   const router = useRouter();
+
   useEffect(() => {
-  async function checkAuth() {
-    const res = await fetch("/api/auth/me", {
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      router.replace("/login"); // ✅ now works
+    async function checkAuth() {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) router.replace("/login");
     }
-  }
-
-  checkAuth();
-}, [router]);
+    checkAuth();
+  }, [router]);
 
   const [activeTab, setActiveTab] = useState<TraderTab>("orders");
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  /* -------- FETCH LOGGED-IN TRADER -------- */
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-
+        const res = await fetch("/api/auth/me", { credentials: "include" });
         if (!res.ok) return;
-
         const data = await res.json();
         setUser(data);
       } catch {
         setUser(null);
       }
     }
-
     fetchUser();
   }, []);
 
   function renderActiveTab() {
     switch (activeTab) {
-      case "orders":
-        return <Orders />;
-      case "bills":
-        return <Bills />;
-      case "profile":
-        return <Profile />;
-      default:
-        return <Orders />;
+      case "orders": return <Orders />;
+      case "bills": return <Bills />;
+      case "profile": return <Profile />;
+      default: return <Orders />;
     }
-
   }
 
-
-
-
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800">
+    <div className="space-y-6 min-h-screen bg-gray-50 dark:bg-gray-950 p-6 rounded-lg">
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
         Welcome{user ? `, ${user.name}` : ""} 👋
       </h2>
 
-      {/* TOP TABS */}
-      <div className="flex gap-2">
-        <TabButton
-          icon={ShoppingBag}
-          label="My Orders"
-          tab="orders"
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-        <TabButton
-          icon={Receipt}
-          label="Bills"
-          tab="bills"
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-        <TabButton
-          icon={UserIcon}
-          label="Profile"
-          tab="profile"
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+      {/* TABS */}
+      <div className="flex gap-2 flex-wrap">
+        <TabButton icon={ShoppingBag} label="My Orders" tab="orders" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton icon={Receipt} label="Bills" tab="bills" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton icon={UserIcon} label="Profile" tab="profile" activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* CONTENT */}
-      <div className="bg-white rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-800">
         {renderActiveTab()}
       </div>
     </div>
@@ -134,7 +96,7 @@ function TabButton({
         ${
           isActive
             ? "bg-green-700 text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
         }`}
     >
       <Icon size={16} />

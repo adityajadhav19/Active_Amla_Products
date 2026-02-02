@@ -1,18 +1,26 @@
+// app/api/admin/product/[id]/status/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+
 export async function PUT(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
 ) {
   const admin = await requireAdmin();
-if (!admin) return 401;
+  if (!admin) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   try {
-    const { id } = context.params;
+    // ✅ MUST await params
+    const { id } = await context.params;
     const traderId = Number(id);
 
-    if (isNaN(traderId)) {
+    if (Number.isNaN(traderId)) {
       return NextResponse.json(
         { error: "Invalid trader ID" },
         { status: 400 }

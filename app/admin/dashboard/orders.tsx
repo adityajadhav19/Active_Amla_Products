@@ -1,5 +1,5 @@
 "use client";
-
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 import { useEffect, useState } from "react";
 import CreateBillButton from "@/components/admin/CreateBillButton";
 
@@ -48,7 +48,7 @@ export default function AdminOrders() {
   }, []);
 
   async function approveOrder(orderId: number) {
-    await fetch(`/api/admin/orders/${orderId}/approve`, {
+    await fetchWithCSRF(`/api/admin/orders/${orderId}/approve`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -56,7 +56,7 @@ export default function AdminOrders() {
   }
 
   async function markDispatched(orderId: number) {
-    await fetch(`/api/admin/orders/${orderId}/send`, {
+    await fetchWithCSRF(`/api/admin/orders/${orderId}/send`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -67,27 +67,41 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Orders</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Orders</h2>
 
-      {orders.length === 0 && <p className="text-gray-500">No orders found.</p>}
+      {orders.length === 0 && (
+        <p className="text-gray-500 dark:text-gray-400">No orders found.</p>
+      )}
 
       {orders.map((order) => (
-        <div key={order.id} className="bg-white p-5 rounded-lg shadow space-y-3 border">
+        <div
+          key={order.id}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-5 rounded-lg shadow space-y-3"
+        >
           {/* HEADER */}
           <div>
-            <p className="font-semibold text-base">Order #{order.orderCode}</p>
-            <p className="text-sm text-gray-600">
-              Trader: {order.trader?.name ?? "—"} {order.trader?.city && `(${order.trader.city})`}
+            <p className="font-semibold text-base text-gray-900 dark:text-white">
+              Order #{order.orderCode}
             </p>
-            <p className="text-xs text-gray-500">Status: {order.status}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Trader: {order.trader?.name ?? "—"}{" "}
+              {order.trader?.city && `(${order.trader.city})`}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              Status: {order.status}
+            </p>
           </div>
 
           {/* ITEMS */}
-          <div className="bg-gray-50 rounded p-3 space-y-1">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded p-3 space-y-1">
             {order.items.map((item, idx) => (
               <div key={idx} className="flex justify-between text-sm">
-                <span>{item.quantity} × {item.product.name}</span>
-                <span className="text-gray-600">₹{item.price}</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {item.quantity} × {item.product.name}
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  ₹{item.price}
+                </span>
               </div>
             ))}
           </div>
@@ -95,46 +109,44 @@ export default function AdminOrders() {
           {/* ACTIONS */}
           <div className="flex justify-end gap-2 pt-2">
 
-            {/* APPROVE */}
             {order.status === "REQUESTED" && (
               <button
                 onClick={() => approveOrder(order.id)}
-                className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm"
+                className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-700"
               >
                 Approve Order
               </button>
             )}
 
-            {/* CREATE BILL */}
             {order.status === "APPROVED" && !order.bill && (
               <CreateBillButton orderId={order.id} onSuccess={fetchOrders} />
             )}
 
-            {/* WAITING PAYMENT */}
             {order.bill && order.bill.status === "UNPAID" && (
-              <div className="text-sm text-yellow-700 text-right">
+              <div className="text-sm text-yellow-700 dark:text-yellow-400 text-right">
                 Waiting for payment
                 <div className="font-medium">₹ {order.bill.totalAmount}</div>
               </div>
             )}
 
-            {/* READY FOR DISPATCH */}
             {order.bill?.status === "PAID" && order.status === "PROCESSING" && (
               <button
                 onClick={() => markDispatched(order.id)}
-                className="bg-green-600 text-white px-4 py-1.5 rounded text-sm"
+                className="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700"
               >
                 Mark as Dispatched
               </button>
             )}
 
-            {/* DISPATCHED */}
             {order.status === "DISPATCHED" && (
-              <span className="text-xs text-gray-500">Dispatched</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Dispatched
+              </span>
             )}
           </div>
         </div>
       ))}
     </div>
+
   );
 }

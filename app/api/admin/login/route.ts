@@ -5,6 +5,7 @@ import { createToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
+    
     const { email, password } = await req.json();
 
     /* ---------------- VALIDATION ---------------- */

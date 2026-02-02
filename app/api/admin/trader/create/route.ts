@@ -2,15 +2,24 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
-export async function POST(req: Request) {
+
+export async function POST(req: Request): Promise<Response> {
+  // 🔐 Admin check
   const admin = await requireAdmin();
-if (!admin) return 401;
+  if (!admin) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   try {
+    await csrfProtect();
     const { name, email, phone, password } = await req.json();
 
-    // 1️⃣ Basic validation
+    // 1️⃣ Validation
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Name, email and password are required" },
@@ -18,7 +27,7 @@ if (!admin) return 401;
       );
     }
 
-    // 2️⃣ Check if trader already exists
+    // 2️⃣ Check existing user
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -60,6 +69,7 @@ if (!admin) return 401;
       },
       { status: 201 }
     );
+
   } catch (error) {
     console.error("CREATE_TRADER_ERROR:", error);
 

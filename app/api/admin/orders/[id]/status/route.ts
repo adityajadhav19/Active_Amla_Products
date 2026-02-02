@@ -1,4 +1,3 @@
-// app/api/admin/orders/[id]/status/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
@@ -15,7 +14,7 @@ const VALID_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
 ) {
   const user = await getAuthUser();
 
@@ -23,8 +22,19 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const orderId = Number(params.id);
+  // ✅ MUST await params
+  const { id } = await context.params;
+  const orderId = Number(id);
+
+  if (Number.isNaN(orderId)) {
+    return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });
+  }
+
   const { status } = await req.json();
+
+  if (!Object.values(OrderStatus).includes(status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },

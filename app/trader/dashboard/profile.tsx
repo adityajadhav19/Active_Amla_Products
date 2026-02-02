@@ -1,24 +1,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 
+/* ---------- TYPES ---------- */
 
+type TraderProfile = {
+  name: string;
+  email: string;
+  role: "TRADER" | "ADMIN" | "USER";
+};
+
+type AddressForm = {
+  addressLine1: string;
+  addressLine2: string;
+  mapLink: string;
+  city: string;
+  state: string;
+  pincode: string;
+};
 
 export default function Profile() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<TraderProfile | null>(null);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-   const [form, setForm] = useState({
+
+  const [form, setForm] = useState<AddressForm>({
     addressLine1: "",
     addressLine2: "",
-    mapLink:"",
+    mapLink: "",
     city: "",
     state: "",
     pincode: "",
   });
+
+  /* ---------- FETCH PROFILE ---------- */
+
+  async function fetchProfile() {
+    try {
+      const res = await fetch("/api/traders/profile", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("FETCH_PROFILE_FAILED:", res.status);
+        return;
+      }
+
+      const data: TraderProfile = await res.json();
+      setProfile(data);
+    } catch (err) {
+      console.error("FETCH_PROFILE_ERROR:", err);
+    }
+  }
+
+  /* ---------- SAVE ADDRESS ---------- */
+
   async function saveProfile() {
-    await fetch("/api/traders/profile", {
+    await fetchWithCSRF("/api/traders/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -28,37 +68,13 @@ export default function Profile() {
     alert("Profile updated");
   }
 
-async function fetchProfile() {
-  try {
-    const res = await fetch("/api/traders/profile", {
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      console.error("FETCH_PROFILE_FAILED:", res.status);
-      return;
-    }
-
-    const text = await res.text();
-
-    if (!text) {
-      console.warn("Empty profile response");
-      return;
-    }
-
-    const data = JSON.parse(text);
-    setProfile(data);
-  } catch (err) {
-    console.error("FETCH_PROFILE_ERROR:", err);
-  }
-}
-
+  /* ---------- CHANGE PASSWORD ---------- */
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch("/api/traders/change-password", {
+    const res = await fetchWithCSRF("/api/traders/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ oldPassword, newPassword }),
@@ -85,19 +101,19 @@ async function fetchProfile() {
     <div className="space-y-8">
 
       {/* ACCOUNT INFO */}
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-semibold mb-2">Account Info</h3>
-        <p>Name: {profile.name}</p>
-        <p>Email: {profile.email}</p>
-        <p>Role: {profile.role}</p>
+      <div className="bg-white dark:bg-gray-900 p-4 rounded shadow border border-gray-200 dark:border-gray-800">
+        <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Account Info</h3>
+        <p className="text-gray-700 dark:text-gray-300">Name: {profile.name}</p>
+        <p className="text-gray-700 dark:text-gray-300">Email: {profile.email}</p>
+        <p className="text-gray-700 dark:text-gray-300">Role: {profile.role}</p>
       </div>
 
       {/* CHANGE PASSWORD */}
       <form
         onSubmit={changePassword}
-        className="bg-white p-4 rounded shadow space-y-3 max-w-md"
+        className="bg-white dark:bg-gray-900 p-4 rounded shadow space-y-3 max-w-md border border-gray-200 dark:border-gray-800"
       >
-        <h3 className="font-semibold">Change Password</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Change Password</h3>
 
         <input
           type="password"
@@ -105,7 +121,7 @@ async function fetchProfile() {
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
           required
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600"
         />
 
         <input
@@ -114,47 +130,47 @@ async function fetchProfile() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600"
         />
 
         <button
           disabled={loading}
-          className="bg-green-700 text-white px-4 py-2 rounded"
+          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded"
         >
           {loading ? "Updating..." : "Update Password"}
         </button>
-        <h2 className="text-lg font-semibold">Shop Address</h2>
-
-      {Object.keys(form).map((key) => (
-        <input
-          key={key}
-          placeholder={key}
-          value={(form as any)[key]}
-          onChange={(e) =>
-            setForm({ ...form, [key]: e.target.value })
-          }
-          className="w-full border px-3 py-2 rounded"
-        />
-      ))}
-
-      <button
-        onClick={saveProfile}
-        className="bg-green-600 text-white px-4 py-2 rounded"
-      >
-        Save
-      </button>
       </form>
-        
+
+      {/* SHOP ADDRESS */}
+      <div className="bg-white dark:bg-gray-900 p-4 rounded shadow space-y-3 max-w-md border border-gray-200 dark:border-gray-800">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Shop Address</h2>
+
+        {(Object.keys(form) as (keyof AddressForm)[]).map((key) => (
+          <input
+            key={key}
+            placeholder={key}
+            value={form[key]}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, [key]: e.target.value }))
+            }
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600"
+          />
+        ))}
+
+        <button
+          onClick={saveProfile}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+        >
+          Save
+        </button>
+      </div>
 
       {/* ORDER HISTORY */}
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-semibold mb-2">Order History</h3>
-
-
-
-       
+      <div className="bg-white dark:bg-gray-900 p-4 rounded shadow border border-gray-200 dark:border-gray-800">
+        <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Order History</h3>
       </div>
 
     </div>
+
   );
 }

@@ -6,14 +6,10 @@ export default function TraderLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white border-b px-6 py-4">
-        <h1 className="text-lg font-semibold text-gray-800">
-          Trader Dashboard
-        </h1>
-      </header>
-
-      <main className="p-6">{children}</main>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 transition-colors">
+      <main className="p-6 text-gray-900 dark:text-gray-100">
+        {children}
+      </main>
     </div>
   );
 }

@@ -1,35 +1,30 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-const RATE_LIMIT = new Map<string, number[]>();
+import { csrfProtect } from "@/lib/csrf-protect";
+import { ratelimit } from "@/lib/rate-limit"; // use your existing limiter
 
 export async function POST(req: Request) {
   try {
-    const ip =
-      req.headers.get("x-forwarded-for") ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    /* ---------------- CSRF ---------------- */
+    await csrfProtect();
 
-    const now = Date.now();
-    const windowMs = 60_000; // 1 minute
-    const maxRequests = 5;
+    /* ---------------- REAL IP ---------------- */
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const ip = forwardedFor?.split(",")[0] ?? "anonymous";
 
-    const timestamps = RATE_LIMIT.get(ip) || [];
-    const recent = timestamps.filter((t) => now - t < windowMs);
-
-    if (recent.length >= maxRequests) {
+    /* ---------------- RATE LIMIT ---------------- */
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
       return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
+        { error: "Too many requests. Try again later." },
         { status: 429 }
       );
     }
 
-    recent.push(now);
-    RATE_LIMIT.set(ip, recent);
-
+    /* ---------------- BODY ---------------- */
     const { name, email, message, company } = await req.json();
 
-    // 🐝 Honeypot check
+    // 🐝 Honeypot
     if (company) {
       return NextResponse.json({ success: true });
     }
@@ -41,13 +36,16 @@ export async function POST(req: Request) {
       );
     }
 
+    /* ---------------- DB ---------------- */
     await prisma.contactMessage.create({
       data: { name, email, message },
     });
 
     return NextResponse.json({ success: true });
+
   } catch (error) {
     console.error("CONTACT_ERROR:", error);
+
     return NextResponse.json(
       { error: "Server error" },
       { status: 500 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 
 type Product = {
   id: number;
@@ -11,6 +12,7 @@ type Product = {
   retailPrice: number;
   wholesalePrice: number;
   isActive: boolean;
+  inStock: boolean;
 };
 
 function slugify(text: string) {
@@ -28,7 +30,6 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [retailPrice, setRetailPrice] = useState("");
@@ -36,15 +37,11 @@ export default function Products() {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   /* ---------------- FETCH ---------------- */
-
   async function fetchProducts() {
     try {
       const res = await fetch("/api/admin/product", {
         credentials: "include",
       });
-
-      if (!res.ok) throw new Error("Fetch failed");
-
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -58,7 +55,6 @@ export default function Products() {
   }, []);
 
   /* ---------------- CREATE ---------------- */
-
   async function handleCreateProduct(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -71,19 +67,17 @@ export default function Products() {
         const fd = new FormData();
         fd.append("file", imageFile);
 
-        const uploadRes = await fetch("/api/admin/product/upload", {
+        const uploadRes = await fetchWithCSRF("/api/admin/product/upload", {
           method: "POST",
           body: fd,
           credentials: "include",
         });
 
-        if (!uploadRes.ok) throw new Error("Image upload failed");
-
         const uploadData = await uploadRes.json();
         imageUrl = uploadData.imageUrl;
       }
 
-      const res = await fetch("/api/admin/product", {
+      await fetchWithCSRF("/api/admin/product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -97,13 +91,10 @@ export default function Products() {
         }),
       });
 
-      if (!res.ok) throw new Error("Create failed");
-
-      setShowForm(false);
       resetForm();
+      setShowForm(false);
       fetchProducts();
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Failed to create product");
     } finally {
       setLoading(false);
@@ -118,232 +109,170 @@ export default function Products() {
     setImageFile(null);
   }
 
-  /* ---------------- STATUS ---------------- */
+  /* ---------------- UPDATE ---------------- */
+  async function handleUpdateProduct(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingProduct) return;
 
+    let imageUrl = editingProduct.imageUrl;
+
+    if (imageFile) {
+      const fd = new FormData();
+      fd.append("file", imageFile);
+
+      const uploadRes = await fetchWithCSRF("/api/admin/product/upload", {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
+
+      const uploadData = await uploadRes.json();
+      imageUrl = uploadData.imageUrl;
+    }
+
+    await fetchWithCSRF(`/api/admin/product/${editingProduct.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        name: editingProduct.name,
+        slug: slugify(editingProduct.name),
+        description: editingProduct.description,
+        retailPrice: editingProduct.retailPrice,
+        wholesalePrice: editingProduct.wholesalePrice,
+        imageUrl,
+      }),
+    });
+
+    setEditingProduct(null);
+    setImageFile(null);
+    fetchProducts();
+  }
+
+  /* ---------------- STATUS ---------------- */
   async function toggleStatus(id: number, isActive: boolean) {
-    await fetch(`/api/admin/product/${id}/status`, {
+    await fetchWithCSRF(`/api/admin/product/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ isActive }),
     });
-    fetchProducts();
+
+    setProducts(prev =>
+      prev.map(p => (p.id === id ? { ...p, isActive } : p))
+    );
   }
 
-/* handle update */
-
-  async function handleUpdateProduct(e: React.FormEvent) {
-  e.preventDefault();
-  if (!editingProduct) return;
-
-  let imageUrl = editingProduct.imageUrl;
-
-  // upload new image if selected
-  if (imageFile) {
-    const formData = new FormData();
-    formData.append("file", imageFile);
-
-    const uploadRes = await fetch("/api/admin/product/upload", {
-      method: "POST",
-      body: formData,
+  /* ---------------- STOCK ---------------- */
+  async function toggleInStock(product: Product) {
+    await fetchWithCSRF(`/api/admin/product/${product.id}/stock`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
+      body: JSON.stringify({ inStock: !product.inStock }),
     });
 
-    const uploadData = await uploadRes.json();
-    imageUrl = uploadData.imageUrl;
+    setProducts(prev =>
+      prev.map(p =>
+        p.id === product.id ? { ...p, inStock: !p.inStock } : p
+      )
+    );
   }
-
-  const res = await fetch(`/api/admin/product/${editingProduct.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      name: editingProduct.name,
-      description: editingProduct.description,
-      retailPrice: editingProduct.retailPrice,
-      wholesalePrice: editingProduct.wholesalePrice,
-      imageUrl,
-    }),
-  });
-
-  if (!res.ok) {
-    alert("Failed to update product");
-    return;
-  }
-
-  setEditingProduct(null);
-  setImageFile(null);
-  fetchProducts();
-}
-
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Products</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Products
+        </h2>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-green-700 text-white px-4 py-2 rounded"
+          className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
         >
           + Add Product
         </button>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-600 bg-red-50 p-2 rounded">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
 
-      {/* Create Form */}
+      {/* CREATE FORM */}
       {showForm && (
-        <form
-          onSubmit={handleCreateProduct}
-          className="bg-white p-4 rounded-lg shadow max-w-md space-y-3"
-        >
+        <form className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 shadow space-y-3 max-w-md rounded">
           <input
-            placeholder="Product name"
+            placeholder="Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
           />
-
           <textarea
             placeholder="Description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
+            onChange={e => setDescription(e.target.value)}
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
           />
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-          />
-
+          <input type="file" />
           <input
             placeholder="Retail price"
             value={retailPrice}
-            onChange={(e) => setRetailPrice(e.target.value)}
+            onChange={e => setRetailPrice(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
           />
-
           <input
             placeholder="Wholesale price"
             value={wholesalePrice}
-            onChange={(e) => setWholesalePrice(e.target.value)}
+            onChange={e => setWholesalePrice(e.target.value)}
             required
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
           />
-
-          <div className="flex gap-2">
-            <button
-              disabled={loading}
-              className="bg-green-700 text-white px-4 py-2 rounded"
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="border px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
+          <button className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800">
+            {loading ? "Creating..." : "Create"}
+          </button>
         </form>
       )}
+
+      {/* EDIT FORM */}
       {editingProduct && (
-  <form
-    onSubmit={handleUpdateProduct}
-    className="bg-white p-4 rounded-lg shadow space-y-3 max-w-md border"
-  >
-    <h3 className="font-semibold">Edit Product</h3>
+        <form className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 shadow space-y-3 max-w-md rounded">
+          <input
+            value={editingProduct.name}
+            onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
+          />
+          <textarea
+            value={editingProduct.description || ""}
+            onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })}
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
+          />
+          <input type="file" />
+          <input
+            type="number"
+            value={editingProduct.retailPrice}
+            onChange={e => setEditingProduct({ ...editingProduct, retailPrice: Number(e.target.value) })}
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
+          />
+          <input
+            type="number"
+            value={editingProduct.wholesalePrice}
+            onChange={e => setEditingProduct({ ...editingProduct, wholesalePrice: Number(e.target.value) })}
+            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
+          />
+          <button className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800">
+            Save
+          </button>
+        </form>
+      )}
 
-    <input
-      value={editingProduct.name}
-      onChange={(e) =>
-        setEditingProduct({ ...editingProduct, name: e.target.value })
-      }
-      required
-      className="w-full border px-3 py-2 rounded"
-    />
-
-    <textarea
-      value={editingProduct.description || ""}
-      onChange={(e) =>
-        setEditingProduct({
-          ...editingProduct,
-          description: e.target.value,
-        })
-      }
-      className="w-full border px-3 py-2 rounded"
-    />
-
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-    />
-
-    <input
-      type="number"
-      value={editingProduct.retailPrice}
-      onChange={(e) =>
-        setEditingProduct({
-          ...editingProduct,
-          retailPrice: Number(e.target.value),
-        })
-      }
-      required
-      className="w-full border px-3 py-2 rounded"
-    />
-
-    <input
-      type="number"
-      value={editingProduct.wholesalePrice}
-      onChange={(e) =>
-        setEditingProduct({
-          ...editingProduct,
-          wholesalePrice: Number(e.target.value),
-        })
-      }
-      required
-      className="w-full border px-3 py-2 rounded"
-    />
-
-    <div className="flex gap-2">
-      <button
-        type="submit"
-        className="bg-green-700 text-white px-4 py-2 rounded"
-      >
-        Save Changes
-      </button>
-
-      <button
-        type="button"
-        onClick={() => {
-          setEditingProduct(null);
-          setImageFile(null);
-        }}
-        className="border px-4 py-2 rounded"
-      >
-        Cancel
-      </button>
-    </div>
-  </form>
-)}
-
-
-      {/* Products */}
+      {/* PRODUCTS GRID */}
       <div className="grid md:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <div key={p.id} className="bg-white p-4 rounded shadow space-y-2">
+        {products.map(p => (
+          <div
+            key={p.id}
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded shadow space-y-2"
+          >
             {p.imageUrl && (
-              <img
+              <Image
                 src={p.imageUrl}
                 alt={p.name}
                 width={400}
@@ -352,48 +281,34 @@ export default function Products() {
               />
             )}
 
-            <h3 className="font-semibold">{p.name}</h3>
-            <p className="text-sm">Retail ₹{p.retailPrice}</p>
-            <p className="text-sm">Wholesale ₹{p.wholesalePrice}</p>
-
-            <span
-              className={`text-xs px-2 py-1 rounded ${
-                p.isActive
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {p.isActive ? "Active" : "Disabled"}
-            </span>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{p.name}</h3>
+            <p className="text-gray-700 dark:text-gray-300">Retail ₹{p.retailPrice}</p>
+            <p className="text-gray-700 dark:text-gray-300">Wholesale ₹{p.wholesalePrice}</p>
 
             <button
               onClick={() => toggleStatus(p.id, !p.isActive)}
-              className="block text-sm border px-3 py-1 rounded"
+              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
             >
               {p.isActive ? "Disable" : "Enable"}
             </button>
+
             <button
-            onClick={async()=>
-            {
-              await fetch(`/api/admin/products/${products.id}`)
-            }
-            }></button>
-            
-            {editingProduct?.id === p.id && (
-  <span className="text-xs text-blue-600">Editing…</span>
-)}
+              onClick={() => toggleInStock(p)}
+              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
+            >
+              {p.inStock ? "In Stock" : "Out of Stock"}
+            </button>
+
             <button
-  onClick={() => {
-    setEditingProduct(p);
-    setShowForm(false);
-  }}
-  className="border px-3 py-1 rounded text-sm"
->
-  Edit
-</button>
+              onClick={() => setEditingProduct(p)}
+              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
+            >
+              Edit
+            </button>
           </div>
         ))}
       </div>
     </div>
+
   );
 }

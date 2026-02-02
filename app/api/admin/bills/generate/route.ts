@@ -4,12 +4,20 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect"; // ✅ ADD
 
 export async function POST(req: Request) {
   const user = await getAuthUser();
 
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ✅ CSRF PROTECTION (RIGHT HERE)
+  try {
+    await csrfProtect();
+  } catch {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
   const {
@@ -31,7 +39,6 @@ export async function POST(req: Request) {
   const totalAmount =
     baseAmount + transportFee + extraCharges - discount;
 
-  // Ensure order exists & is approved
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { bill: true },
@@ -48,7 +55,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Create bill
   const bill = await prisma.bill.create({
     data: {
       orderId,
@@ -62,7 +68,6 @@ export async function POST(req: Request) {
     },
   });
 
-  // Update order status
   await prisma.order.update({
     where: { id: orderId },
     data: { status: "PROCESSING" },

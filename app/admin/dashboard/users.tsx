@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 
 type User = {
   id: number;
@@ -26,7 +27,7 @@ export default function Users() {
   }, []);
 
   async function toggleStatus(id: number, isActive: boolean) {
-    await fetch(`/api/admin/users/${id}/status`, {
+    await fetchWithCSRF(`/api/admin/users/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -38,31 +39,43 @@ export default function Users() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Users</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Users
+      </h2>
 
       {users.map((user) => (
         <div
           key={user.id}
-          className="bg-white p-4 rounded shadow flex justify-between items-center"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded shadow flex justify-between items-center"
         >
           <div>
-            <p className="font-semibold">{user.name}</p>
-            <p className="text-sm text-gray-600">{user.email}</p>
+            <p className="font-semibold text-gray-900 dark:text-white">
+              {user.name}
+            </p>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {user.email}
+            </p>
+
             {user.phone && (
-              <p className="text-xs text-gray-500">{user.phone}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                {user.phone}
+              </p>
             )}
           </div>
 
           <button
             onClick={() => toggleStatus(user.id, !user.isActive)}
-            className={`px-4 py-2 rounded text-white ${
-              user.isActive ? "bg-red-600" : "bg-green-600"
-            }`}
+            className={`px-4 py-2 rounded text-white ${user.isActive
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-green-600 hover:bg-green-700"
+              }`}
           >
             {user.isActive ? "Disable" : "Enable"}
           </button>
         </div>
       ))}
     </div>
+
   );
 }

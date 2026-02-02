@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 
 type Product = {
   id: number;
@@ -100,7 +102,7 @@ export default function TraderProductsPage() {
     setPlacingOrder(true);
 
     try {
-      const res = await fetch("/api/traders/orders", {
+      const res = await fetchWithCSRF("/api/traders/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -133,7 +135,7 @@ export default function TraderProductsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
-      <h1 className="text-3xl font-semibold text-center">
+      <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">
         Wholesale Products
       </h1>
 
@@ -150,90 +152,45 @@ export default function TraderProductsPage() {
 
       {/* CART */}
       {cart.length > 0 && (
-        <div className="bg-white p-6 rounded shadow space-y-4">
-          <h2 className="text-xl font-semibold">Bulk Order Summary</h2>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded shadow space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Bulk Order Summary
+          </h2>
 
           {cart.map((item) => (
             <div
               key={item.productId}
-              className="flex justify-between items-center text-sm border-b pb-2"
+              className="flex justify-between items-center text-sm border-b border-gray-200 dark:border-gray-700 pb-2"
             >
               <div>
-                <p className="font-medium">{item.name}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{item.name}</p>
 
                 <div className="flex items-center gap-2 mt-1">
-                  <button
-                    onClick={() =>
-                      setCart((prev) =>
-                        prev.map((p) =>
-                          p.productId === item.productId
-                            ? {
-                                ...p,
-                                quantity: Math.max(1, p.quantity - 1),
-                              }
-                            : p
-                        )
-                      )
-                    }
-                    className="px-2 bg-gray-200 rounded"
-                  >
-                    −
-                  </button>
-
-                  <span>{item.quantity}</span>
-
-                  <button
-                    onClick={() =>
-                      setCart((prev) =>
-                        prev.map((p) =>
-                          p.productId === item.productId
-                            ? { ...p, quantity: p.quantity + 1 }
-                            : p
-                        )
-                      )
-                    }
-                    className="px-2 bg-gray-200 rounded"
-                  >
-                    +
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setCart((prev) =>
-                        prev.filter(
-                          (p) => p.productId !== item.productId
-                        )
-                      )
-                    }
-                    className="ml-3 text-red-600 text-xs"
-                  >
-                    Remove
-                  </button>
+                  <button className="px-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-900 dark:text-gray-100">−</button>
+                  <span className="text-gray-900 dark:text-gray-100">{item.quantity}</span>
+                  <button className="px-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-900 dark:text-gray-100">+</button>
+                  <button className="ml-3 text-red-600 text-xs">Remove</button>
                 </div>
               </div>
 
-              <span className="font-medium">
+              <span className="font-medium text-gray-900 dark:text-gray-100">
                 ₹{item.quantity * item.price}
               </span>
             </div>
           ))}
 
           {/* TOTAL */}
-          <div className="flex justify-between font-semibold pt-2">
+          <div className="flex justify-between font-semibold pt-2 text-gray-900 dark:text-gray-100">
             <span>Total</span>
             <span>
-              ₹
-              {cart.reduce(
-                (sum, item) => sum + item.price * item.quantity,
-                0
-              )}
+              ₹{cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
             </span>
           </div>
 
           <button
             onClick={placeBulkOrder}
             disabled={placingOrder}
-            className="w-full bg-green-700 text-white py-2 rounded"
+            className="w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded"
           >
             {placingOrder ? "Placing Order..." : "Place Bulk Order"}
           </button>
@@ -255,9 +212,9 @@ function ProductCard({
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
       {product.imageUrl && (
-        <img
+        <Image
           src={product.imageUrl}
           alt={product.name}
           className="h-48 w-full object-cover"
@@ -265,15 +222,17 @@ function ProductCard({
       )}
 
       <div className="p-4 space-y-2">
-        <h2 className="font-semibold text-lg">{product.name}</h2>
+        <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+          {product.name}
+        </h2>
 
         {product.description && (
-          <p className="text-sm text-gray-600 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
             {product.description}
           </p>
         )}
 
-        <p className="font-bold text-green-700">
+        <p className="font-bold text-green-700 dark:text-green-400">
           ₹{product.wholesalePrice}
         </p>
 
@@ -286,12 +245,12 @@ function ProductCard({
               const val = Number(e.target.value);
               if (val > 0) setQuantity(val);
             }}
-            className="w-20 border px-2 py-1 rounded"
+            className="w-20 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded"
           />
 
           <button
             onClick={() => onAdd(product, quantity)}
-            className="flex-1 bg-green-600 text-white rounded"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded"
           >
             Add
           </button>

@@ -1,9 +1,25 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 export default function IndiaFestivalBanner() {
   const today = new Date()
   const day = today.getDate()
   const month = today.getMonth()
+
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains("dark"))
+    }
+
+    checkTheme()
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true })
+
+    return () => observer.disconnect()
+  }, [])
 
   let text = ""
 
@@ -18,8 +34,15 @@ export default function IndiaFestivalBanner() {
   if (!text) return null
 
   return (
-    <div className="w-full bg-gradient-to-r from-orange-500 via-white to-green-600 text-center py-2 text-sm font-medium text-gray-900 shadow-sm">
+    <div
+      className={`w-full text-center py-2 text-sm font-medium shadow-sm ${
+        isDark
+          ? "bg-gradient-to-r from-orange-600 via-gray-900 to-green-700 text-white"
+          : "bg-gradient-to-r from-orange-500 via-white to-green-600 text-gray-900"
+      }`}
+    >
       {text}
     </div>
   )
 }
+

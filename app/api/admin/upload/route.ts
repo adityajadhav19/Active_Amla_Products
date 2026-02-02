@@ -1,10 +1,18 @@
 import cloudinary from "@/lib/cloudinary";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
+import { UploadApiResponse } from "cloudinary";
+import { csrfProtect } from "@/lib/csrf-protect";
 export async function POST(req: Request) {
    const admin = await requireAdmin();
-  
+    try {
+      await csrfProtect();
+    } catch {
+      return NextResponse.json(
+        { error: "CSRF token missing or invalid" },
+        { status: 403 }
+      );
+    }
     if (!admin) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -22,17 +30,23 @@ export async function POST(req: Request) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const result = await new Promise<any>((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      {
-        folder: "products",
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    ).end(buffer);
-  });
+const uploadResult: UploadApiResponse = await new Promise(
+  (resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: "active-products/products",
+          resource_type: "image",
+        },
+        (error: Error | undefined, result?: UploadApiResponse) => {
+          if (error) return reject(error);
+          if (!result) return reject(new Error("Upload failed"));
+          resolve(result);
+        }
+      )
+      .end(buffer);
+  }
+);
 
-  return Response.json({ url: result.secure_url });
+  return Response.json({ url: uploadResult.secure_url });
 }
