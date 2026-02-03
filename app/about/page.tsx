@@ -5,9 +5,9 @@ import { Award, Users, Leaf, Heart, Clock, MapPin } from "lucide-react"
 import WhatsAppButton from "@/components/whatsapp-button"
 
 export const metadata = {
-  title: "About Us - Active Amla Delights | Our Story & Heritage",
+  title: "About Us - Active Products | Our Story & Heritage",
   description:
-    "Learn about Active Amla Delights' journey since 2010. Discover our family tradition, commitment to quality, and passion for bringing you the finest Amla products.",
+    "Learn about Active Products' journey since 2010. Discover our family tradition, commitment to quality, and passion for bringing you the finest Amla products.",
 }
 
 export default function AboutPage() {
@@ -39,7 +39,7 @@ export default function AboutPage() {
             Our <span className="text-green-600 dark:text-emerald-400">Story</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Three generations of dedication to bringing you the finest Amla products.
+            Two generations of dedication to bringing you the finest Amla products.
           </p>
         </div>
 

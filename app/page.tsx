@@ -282,7 +282,7 @@ dark:from-[#0f2027] dark:via-[#203a43] dark:to-[#2c5364] py-20 px-4">
               </Badge>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-                Three Generations of{" "}
+                Two Generations of{" "}
                 <span className="text-green-600 dark:text-emerald-400">Amla Excellence</span>
               </h2>
 
@@ -305,7 +305,7 @@ dark:from-[#0f2027] dark:via-[#203a43] dark:to-[#2c5364] py-20 px-4">
                   <div className="text-gray-600 dark:text-gray-400">Years of Excellence</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 dark:text-emerald-400">1000+</div>
+                  <div className="text-3xl font-bold text-green-600 dark:text-emerald-400">10000+</div>
                   <div className="text-gray-600 dark:text-gray-400">Happy Families</div>
                 </div>
               </div>

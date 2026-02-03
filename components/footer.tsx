@@ -13,12 +13,12 @@ export default function Footer() {
                 <Leaf className="w-6 h-6 text-white" />
               </div>
               <div>
-                <div className="text-xl font-bold">Active Amla Delights</div>
+                <div className="text-xl font-bold">Active Products</div>
                 <div className="text-sm text-gray-400">Since 2010</div>
               </div>
             </div>
             <p className="text-gray-400 leading-relaxed">
-              Three generations of tradition bringing you the finest Amla products from the heart of Maharashtra.
+              Two generations of tradition bringing you the finest Amla products from the heart of Maharashtra.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
@@ -103,7 +103,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Active Amla Delights. All rights reserved. Made with ❤️ in Maharashtra.
+            © {new Date().getFullYear()} Active Products. All rights reserved. Made with ❤️ in Maharashtra.
           </p>
         </div>
       </div>
