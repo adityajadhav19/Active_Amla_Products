@@ -1,25 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 import { NextResponse } from "next/server";
 
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> } // ✅ Next 15 format
+  context: { params: Promise<{ id: string }> }
 ) {
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // ✅ MUST await params
+  // 🔐 CSRF PROTECTION
+  await csrfProtect();
+
   const { id } = await context.params;
   const productId = Number(id);
 
   if (Number.isNaN(productId)) {
-    return NextResponse.json(
-      { error: "Invalid product ID" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
   }
 
   const body = await req.json();
@@ -27,7 +27,6 @@ export async function PUT(
   const name = body.name?.trim();
   const description = body.description ?? null;
   const imageUrl = body.imageUrl ?? null;
-
   const retailPrice = Number(body.retailPrice);
   const wholesalePrice = Number(body.wholesalePrice);
 
@@ -38,7 +37,27 @@ export async function PUT(
     );
   }
 
-  const slug = name.toLowerCase().replace(/\s+/g, "-");
+  /* ---------------- SLUG GENERATION (SAFE) ---------------- */
+  function generateSlug(name: string) {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  let baseSlug = generateSlug(name);
+  let slug = baseSlug;
+  let count = 1;
+
+  // avoid slug collision with other products
+  while (
+    await prisma.product.findFirst({
+      where: { slug, NOT: { id: productId } },
+    })
+  ) {
+    slug = `${baseSlug}-${count++}`;
+  }
 
   try {
     const product = await prisma.product.update({

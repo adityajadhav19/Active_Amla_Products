@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react"
-
+import Image from "next/image"
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
@@ -9,14 +9,24 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="bg-green-600 p-2 rounded-full">
-                <Leaf className="w-6 h-6 text-white" />
-              </div>
+              <Image
+                src="/2.png"
+                alt="Active Products Logo"
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                priority
+              />
               <div>
-                <div className="text-xl font-bold">Active Products</div>
-                <div className="text-sm text-gray-400">Since 2010</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                  Active Products
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Since 2010
+                </div>
               </div>
             </div>
+
             <p className="text-gray-400 leading-relaxed">
               Two generations of tradition bringing you the finest Amla products from the heart of Maharashtra.
             </p>
@@ -64,16 +74,16 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Our Products</h3>
             <a href="/products">
-            <ul className="space-y-2">
-              <li className="text-gray-400">Amla Candy </li>
-              <li className="text-gray-400">Amla Supari</li>
-              <li className="text-gray-400">Amla Pickle</li>
-              <li className="text-gray-400">Amla Murabba</li>
-              <li className="text-gray-400">Amla Morawala</li>
-              <li className="text-gray-400">Spicy Amla Candy</li>
-              <li className="text-gray-400">Amla Juice</li>
-              <li className="text-gray-400">Amla Churna</li>
-            </ul>
+              <ul className="space-y-2">
+                <li className="text-gray-400">Amla Candy </li>
+                <li className="text-gray-400">Amla Supari</li>
+                <li className="text-gray-400">Amla Pickle</li>
+                <li className="text-gray-400">Amla Murabba</li>
+                <li className="text-gray-400">Amla Morawala</li>
+                <li className="text-gray-400">Spicy Amla Candy</li>
+                <li className="text-gray-400">Amla Juice</li>
+                <li className="text-gray-400">Amla Churna</li>
+              </ul>
             </a>
           </div>
 
@@ -85,8 +95,8 @@ export default function Footer() {
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                 <div className="text-gray-400 text-sm">
                   <a href="https://maps.app.goo.gl/Lpm8ivoFYtgh3HHn7">Gopikishan Nagar
-                  <br />
-                  Jalna, Maharashtra 431203</a>
+                    <br />
+                    Jalna, Maharashtra 431203</a>
                 </div>
               </div>
               <div className="flex items-center gap-3">

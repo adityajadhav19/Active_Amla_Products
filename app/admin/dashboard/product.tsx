@@ -8,20 +8,13 @@ type Product = {
   id: number;
   name: string;
   description?: string;
+  slug: string;
   imageUrl?: string;
   retailPrice: number;
   wholesalePrice: number;
   isActive: boolean;
   inStock: boolean;
 };
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-");
-}
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -36,18 +29,10 @@ export default function Products() {
   const [wholesalePrice, setWholesalePrice] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  /* ---------------- FETCH ---------------- */
   async function fetchProducts() {
-    try {
-      const res = await fetch("/api/admin/product", {
-        credentials: "include",
-      });
-      const data = await res.json();
-      setProducts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      setProducts([]);
-    }
+    const res = await fetch("/api/admin/product", { credentials: "include" });
+    const data = await res.json();
+    setProducts(Array.isArray(data) ? data : []);
   }
 
   useEffect(() => {
@@ -83,7 +68,6 @@ export default function Products() {
         credentials: "include",
         body: JSON.stringify({
           name,
-          slug: slugify(name),
           description,
           retailPrice: Number(retailPrice),
           wholesalePrice: Number(wholesalePrice),
@@ -136,7 +120,6 @@ export default function Products() {
       credentials: "include",
       body: JSON.stringify({
         name: editingProduct.name,
-        slug: slugify(editingProduct.name),
         description: editingProduct.description,
         retailPrice: editingProduct.retailPrice,
         wholesalePrice: editingProduct.wholesalePrice,
@@ -149,7 +132,6 @@ export default function Products() {
     fetchProducts();
   }
 
-  /* ---------------- STATUS ---------------- */
   async function toggleStatus(id: number, isActive: boolean) {
     await fetchWithCSRF(`/api/admin/product/${id}/status`, {
       method: "PATCH",
@@ -163,7 +145,6 @@ export default function Products() {
     );
   }
 
-  /* ---------------- STOCK ---------------- */
   async function toggleInStock(product: Product) {
     await fetchWithCSRF(`/api/admin/product/${product.id}/stock`, {
       method: "PATCH",
@@ -182,133 +163,64 @@ export default function Products() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Products
-        </h2>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
-        >
+        <h2 className="text-lg font-semibold">Products</h2>
+        <button onClick={() => setShowForm(true)} className="bg-green-700 text-white px-4 py-2 rounded">
           + Add Product
         </button>
       </div>
 
-      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-red-600">{error}</p>}
 
       {/* CREATE FORM */}
       {showForm && (
-        <form className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 shadow space-y-3 max-w-md rounded">
-          <input
-            placeholder="Name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <input type="file" />
-          <input
-            placeholder="Retail price"
-            value={retailPrice}
-            onChange={e => setRetailPrice(e.target.value)}
-            required
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <input
-            placeholder="Wholesale price"
-            value={wholesalePrice}
-            onChange={e => setWholesalePrice(e.target.value)}
-            required
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <button className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800">
-            {loading ? "Creating..." : "Create"}
-          </button>
+        <form onSubmit={handleCreateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded">
+          <input value={name} placeholder="Name of Product" onChange={e => setName(e.target.value)} required className="w-full border p-2 rounded" />
+          <textarea value={description} placeholder="Description of Product" onChange={e => setDescription(e.target.value)} className="w-full border p-2 rounded" />
+          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} />
+          <input value={retailPrice} placeholder="Retail Price" onChange={e => setRetailPrice(e.target.value)} required className="w-full border p-2 rounded" />
+          <input value={wholesalePrice} placeholder="Wholesale Price" onChange={e => setWholesalePrice(e.target.value)} required className="w-full border p-2 rounded" />
+          <button className="bg-green-700 text-white px-4 py-2 rounded">{loading ? "Creating..." : "Create"}</button>
         </form>
       )}
 
       {/* EDIT FORM */}
       {editingProduct && (
-        <form className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 shadow space-y-3 max-w-md rounded">
-          <input
-            value={editingProduct.name}
-            onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <textarea
-            value={editingProduct.description || ""}
-            onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })}
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <input type="file" />
-          <input
-            type="number"
-            value={editingProduct.retailPrice}
-            onChange={e => setEditingProduct({ ...editingProduct, retailPrice: Number(e.target.value) })}
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <input
-            type="number"
-            value={editingProduct.wholesalePrice}
-            onChange={e => setEditingProduct({ ...editingProduct, wholesalePrice: Number(e.target.value) })}
-            className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded"
-          />
-          <button className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800">
-            Save
-          </button>
+        <form onSubmit={handleUpdateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded">
+          <input value={editingProduct.name} placeholder="Name of Product" onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} />
+          <textarea value={editingProduct.description || ""} placeholder="Description of Product" onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })} />
+          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} />
+          <input type="number" value={editingProduct.retailPrice} placeholder="Retail Price" onChange={e => setEditingProduct({ ...editingProduct, retailPrice: Number(e.target.value) })} />
+          <input type="number" value={editingProduct.wholesalePrice} placeholder="Wholesale Price" onChange={e => setEditingProduct({ ...editingProduct, wholesalePrice: Number(e.target.value) })} />
+          <button className="bg-green-700 text-white px-4 py-2 rounded">Save</button>
         </form>
       )}
 
-      {/* PRODUCTS GRID */}
-      <div className="grid md:grid-cols-3 gap-4">
+      {/* PRODUCTS GRID unchanged */}
+        <div className="grid md:grid-cols-3 gap-4">
         {products.map(p => (
-          <div
-            key={p.id}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded shadow space-y-2"
-          >
+          <div key={p.id} className="bg-white border p-4 rounded shadow space-y-2">
             {p.imageUrl && (
-              <Image
-                src={p.imageUrl}
-                alt={p.name}
-                width={400}
-                height={200}
-                className="rounded object-cover"
-              />
+              <Image src={p.imageUrl} alt={p.name} width={400} height={200} className="rounded object-cover" />
             )}
+            <h3 className="font-semibold">{p.name}</h3>
+            <p>Retail ₹{p.retailPrice}</p>
+            <p>Wholesale ₹{p.wholesalePrice}</p>
 
-            <h3 className="font-semibold text-gray-900 dark:text-white">{p.name}</h3>
-            <p className="text-gray-700 dark:text-gray-300">Retail ₹{p.retailPrice}</p>
-            <p className="text-gray-700 dark:text-gray-300">Wholesale ₹{p.wholesalePrice}</p>
-
-            <button
-              onClick={() => toggleStatus(p.id, !p.isActive)}
-              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
-            >
+            <button onClick={() => toggleStatus(p.id, !p.isActive)} className="border px-3 py-1 rounded text-sm">
               {p.isActive ? "Disable" : "Enable"}
             </button>
 
-            <button
-              onClick={() => toggleInStock(p)}
-              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
-            >
+            <button onClick={() => toggleInStock(p)} className="border px-3 py-1 rounded text-sm">
               {p.inStock ? "In Stock" : "Out of Stock"}
             </button>
 
-            <button
-              onClick={() => setEditingProduct(p)}
-              className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200"
-            >
+            <button onClick={() => setEditingProduct(p)} className="border px-3 py-1 rounded text-sm">
               Edit
             </button>
           </div>
         ))}
       </div>
+   
     </div>
-
   );
 }

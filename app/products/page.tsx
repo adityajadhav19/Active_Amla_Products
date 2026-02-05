@@ -45,7 +45,7 @@ export default function ProductsPage() {
     <main className="bg-gray-50 dark:bg-gray-950 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-10">
         <h1 className="text-3xl font-semibold mb-8 text-center text-gray-900 dark:text-white">
-          Our Products
+          Our Product
         </h1>
 
         {products.length === 0 && (
