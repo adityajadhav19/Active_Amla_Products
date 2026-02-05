@@ -6,7 +6,7 @@ import { UploadApiResponse } from "cloudinary";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { requireAdmin } from "@/lib/auth";
-import { csrfProtect } from "@/lib/csrf-protect";
+
 
 /* ---------------- CLOUDINARY CONFIG ---------------- */
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
  
 
   try {
-    await csrfProtect();
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
