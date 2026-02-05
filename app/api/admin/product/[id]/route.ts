@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-import { csrfProtect } from "@/lib/csrf-protect";
 import { NextResponse } from "next/server";
 
 export async function PUT(
@@ -12,8 +11,7 @@ export async function PUT(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // 🔐 CSRF PROTECTION
-  await csrfProtect();
+ 
 
   const { id } = await context.params;
   const productId = Number(id);
