@@ -173,48 +173,48 @@ export default function Products() {
 
       {/* CREATE FORM */}
       {showForm && (
-        <form onSubmit={handleCreateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded">
-          <input value={name} placeholder="Name of Product" onChange={e => setName(e.target.value)} required className="w-full border p-2 rounded" />
-          <textarea value={description} placeholder="Description of Product" onChange={e => setDescription(e.target.value)} className="w-full border p-2 rounded" />
-          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} />
-          <input value={retailPrice} placeholder="Retail Price" onChange={e => setRetailPrice(e.target.value)} required className="w-full border p-2 rounded" />
-          <input value={wholesalePrice} placeholder="Wholesale Price" onChange={e => setWholesalePrice(e.target.value)} required className="w-full border p-2 rounded" />
+        <form onSubmit={handleCreateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded dark:bg-gray-800">
+          <input value={name} placeholder="Name of Product" onChange={e => setName(e.target.value)} required className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <textarea value={description} placeholder="Description of Product" onChange={e => setDescription(e.target.value)} className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-100 cursor-pointer dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+          <input value={retailPrice} placeholder="Retail Price" onChange={e => setRetailPrice(e.target.value)} required className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <input value={wholesalePrice} placeholder="Wholesale Price" onChange={e => setWholesalePrice(e.target.value)} required className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
           <button className="bg-green-700 text-white px-4 py-2 rounded">{loading ? "Creating..." : "Create"}</button>
         </form>
       )}
 
       {/* EDIT FORM */}
       {editingProduct && (
-        <form onSubmit={handleUpdateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded">
-          <input value={editingProduct.name} placeholder="Name of Product" onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} />
-          <textarea value={editingProduct.description || ""} placeholder="Description of Product" onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })} />
-          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} />
-          <input type="number" value={editingProduct.retailPrice} placeholder="Retail Price" onChange={e => setEditingProduct({ ...editingProduct, retailPrice: Number(e.target.value) })} />
-          <input type="number" value={editingProduct.wholesalePrice} placeholder="Wholesale Price" onChange={e => setEditingProduct({ ...editingProduct, wholesalePrice: Number(e.target.value) })} />
-          <button className="bg-green-700 text-white px-4 py-2 rounded">Save</button>
+        <form onSubmit={handleUpdateProduct} className="bg-white p-4 shadow space-y-3 max-w-md rounded dark:bg-gray-800">
+          <input value={editingProduct.name} placeholder="Name of Product" onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <textarea value={editingProduct.description || ""} placeholder="Description of Product" onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })} className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-100 cursor-pointer dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+          <input type="number" value={editingProduct.retailPrice} placeholder="Retail Price" onChange={e => setEditingProduct({ ...editingProduct, retailPrice: Number(e.target.value) })} className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <input type="number" value={editingProduct.wholesalePrice} placeholder="Wholesale Price" onChange={e => setEditingProduct({ ...editingProduct, wholesalePrice: Number(e.target.value) })} className="w-full border p-2 rounded dark:bg-gray-700 dark:text-white" />
+          <button className="bg-green-700 text-white px-4 py-2 rounded">{loading ? "Updating..." : "Update"}</button>
         </form>
       )}
 
       {/* PRODUCTS GRID unchanged */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 dark:bg-gray-900 p-4 rounded">
         {products.map(p => (
-          <div key={p.id} className="bg-white border p-4 rounded shadow space-y-2">
+          <div key={p.id} className="bg-white border p-4 rounded shadow space-y-2 dark:bg-gray-800">
             {p.imageUrl && (
-              <Image src={p.imageUrl} alt={p.name} width={400} height={200} className="rounded object-cover" />
+              <Image src={p.imageUrl} alt={p.name} width={400} height={200} className="rounded object-cover " />
             )}
             <h3 className="font-semibold">{p.name}</h3>
             <p>Retail ₹{p.retailPrice}</p>
             <p>Wholesale ₹{p.wholesalePrice}</p>
 
-            <button onClick={() => toggleStatus(p.id, !p.isActive)} className="border px-3 py-1 rounded text-sm">
+            <button onClick={() => toggleStatus(p.id, !p.isActive)} className="border px-3 py-1 rounded text-sm dark:text-white">
               {p.isActive ? "Disable" : "Enable"}
             </button>
 
-            <button onClick={() => toggleInStock(p)} className="border px-3 py-1 rounded text-sm">
+            <button onClick={() => toggleInStock(p)} className="border px-3 py-1 rounded text-sm dark:text-white">
               {p.inStock ? "In Stock" : "Out of Stock"}
             </button>
 
-            <button onClick={() => setEditingProduct(p)} className="border px-3 py-1 rounded text-sm">
+            <button onClick={() => setEditingProduct(p)} className="border px-3 py-1 rounded text-sm dark:text-white">
               Edit
             </button>
           </div>

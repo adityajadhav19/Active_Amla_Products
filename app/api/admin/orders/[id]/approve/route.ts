@@ -1,8 +1,14 @@
 // app/api/admin/orders/[id]/approve/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { OrderStatus } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
+
+const ORDER_STATUSES = {
+  REQUESTED: "REQUESTED",
+  APPROVED: "APPROVED",
+} as const;
+
+
 
 export async function PATCH(
   req: Request,
@@ -16,7 +22,7 @@ export async function PATCH(
 
   const order = await prisma.order.findUnique({ where: { id: orderId } });
 
-  if (!order || order.status !== OrderStatus.REQUESTED) {
+  if (!order || order.status !== ORDER_STATUSES.REQUESTED) {
     return NextResponse.json(
       { error: "Only REQUESTED orders can be approved" },
       { status: 400 }
@@ -25,7 +31,7 @@ export async function PATCH(
 
   await prisma.order.update({
     where: { id: orderId },
-    data: { status: OrderStatus.APPROVED },
+    data: { status: ORDER_STATUSES.APPROVED },
   });
 
   return NextResponse.json({ success: true });

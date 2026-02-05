@@ -1,8 +1,14 @@
 // app/api/admin/orders/[id]/send/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { OrderStatus } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
+
+const ORDER_STATUSES = {
+  PROCESSING: "PROCESSING",
+  DISPATCHED: "DISPATCHED",
+} as const;
+
+
 
 export async function PATCH(
   req: Request,
@@ -26,7 +32,7 @@ export async function PATCH(
     }
 
     // Dispatch only from PROCESSING
-    if (order.status !== OrderStatus.PROCESSING) {
+    if (order.status !== ORDER_STATUSES.PROCESSING) {
       return NextResponse.json(
         { error: "Order must be PROCESSING before dispatch" },
         { status: 400 }
@@ -35,7 +41,7 @@ export async function PATCH(
 
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { status: OrderStatus.DISPATCHED },
+      data: { status: ORDER_STATUSES.DISPATCHED },
     });
 
     return NextResponse.json(updatedOrder);
