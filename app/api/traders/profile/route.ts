@@ -1,6 +1,5 @@
 // app/api/trader/profile/route.ts
 export const dynamic = "force-dynamic";
-import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
@@ -33,7 +32,6 @@ export async function GET() {
       mapLink: true,
       addressLine1: true,
       addressLine2: true,
-      
     },
   });
 
@@ -56,7 +54,15 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
- const updateData: Prisma.UserUpdateInput = {};
+  const updateData: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    phone?: string;
+    pincode?: string;
+    mapLink?: string;
+  } = {};
 
   /* ---- SAFE STRING FIELDS ---- */
   if (typeof body.addressLine1 === "string") {

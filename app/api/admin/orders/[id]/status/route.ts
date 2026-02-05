@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
-import { OrderStatus } from "@prisma/client";
+
+const ORDER_STATUSES = [
+  "REQUESTED",
+  "APPROVED",
+  "PROCESSING",
+  "DISPATCHED",
+  "DELIVERED",
+  "CANCELLED",
+] as const;
+
+type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 const VALID_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
   REQUESTED: ["APPROVED", "CANCELLED"],
@@ -14,7 +24,7 @@ const VALID_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
 
 export async function PATCH(
   req: Request,
-  context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
+  context: { params: Promise<{ id: string }> }
 ) {
   const user = await getAuthUser();
 
@@ -22,7 +32,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // ✅ MUST await params
   const { id } = await context.params;
   const orderId = Number(id);
 
@@ -32,7 +41,7 @@ export async function PATCH(
 
   const { status } = await req.json();
 
-  if (!Object.values(OrderStatus).includes(status)) {
+  if (!ORDER_STATUSES.includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
@@ -44,7 +53,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  const allowedNext = VALID_NEXT_STATUS[order.status];
+  const allowedNext = VALID_NEXT_STATUS[order.status as OrderStatus];
 
   if (!allowedNext.includes(status)) {
     return NextResponse.json(

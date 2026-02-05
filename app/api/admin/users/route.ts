@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(): Promise<Response> {
@@ -17,7 +16,7 @@ export async function GET(): Promise<Response> {
   try {
     const users = await prisma.user.findMany({
       where: {
-        role: Role.USER,
+        role: "USER",
       },
       select: {
         id: true,

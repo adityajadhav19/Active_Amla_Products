@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
-import { OrderStatus } from "@prisma/client";
 import { csrfProtect } from "@/lib/csrf-protect";
+
+const ORDER_STATUS = {
+  REQUESTED: "REQUESTED",
+} as const;
 
 /* ================== TYPES ================== */
 type OrderItemInput = {
@@ -84,8 +87,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const priceMap = new Map(
-      products.map((p) => [p.id, p.wholesalePrice])
+    const priceMap = new Map<number, number>(
+      products.map((p: { id: number; wholesalePrice: number }) => [p.id, p.wholesalePrice])
     );
 
     /* 🧾 CREATE ORDER */
@@ -93,7 +96,7 @@ export async function POST(req: Request) {
       data: {
         orderCode: `ORD-${Date.now()}`,
         traderId: user.id,
-        status: OrderStatus.REQUESTED,
+        status: ORDER_STATUS.REQUESTED,
         items: {
           create: items.map((item) => ({
             productId: item.productId,
