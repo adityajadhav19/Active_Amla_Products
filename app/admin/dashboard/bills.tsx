@@ -27,7 +27,7 @@ export default function AdminBills() {
 
   async function fetchBills() {
     try {
-      const res = await fetch("/api/admin/bills", {
+      const res = await fetchWithCSRF("/api/admin/bills", {
         credentials: "include",
       });
 
