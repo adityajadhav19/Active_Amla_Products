@@ -3,11 +3,12 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
-
+import { csrfProtect } from "@/lib/csrf-protect"; 
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
+  await csrfProtect(); 
   try {
     const user = await getAuthUser();
 

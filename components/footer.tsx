@@ -18,7 +18,7 @@ export default function Footer() {
                 priority
               />
               <div>
-                <div className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="text-xl font-bold text-gray-50 dark:text-white">
                   Active Products
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">

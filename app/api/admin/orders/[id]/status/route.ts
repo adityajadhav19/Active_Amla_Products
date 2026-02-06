@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { OrderStatus } from "@prisma/client";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 const VALID_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
   REQUESTED: ["APPROVED", "CANCELLED"],
@@ -16,6 +17,7 @@ export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
 ) {
+  await csrfProtect();
   const user = await getAuthUser();
 
   if (!user || user.role !== "ADMIN") {

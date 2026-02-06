@@ -3,6 +3,7 @@
 
 import React from "react";
 
+
 export default function AdminLayout({
   children,
 }: {
@@ -11,6 +12,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex dark:bg-gray-950">
+      
       <main className="flex-1 p-6 bg-gray-100 dark:bg-gray-700">
         {children}
       </main>

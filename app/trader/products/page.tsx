@@ -215,6 +215,8 @@ function ProductCard({
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
       {product.imageUrl && (
         <Image
+        width={400}
+        height={200}
           src={product.imageUrl}
           alt={product.name}
           className="h-48 w-full object-cover"

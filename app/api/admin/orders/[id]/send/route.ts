@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 const ORDER_STATUSES = {
   PROCESSING: "PROCESSING",
@@ -15,6 +16,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    await csrfProtect();
     const admin = await requireAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,7 +33,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Dispatch only from PROCESSING
     if (order.status !== ORDER_STATUSES.PROCESSING) {
       return NextResponse.json(
         { error: "Order must be PROCESSING before dispatch" },

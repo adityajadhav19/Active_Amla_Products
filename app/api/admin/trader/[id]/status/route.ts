@@ -1,12 +1,17 @@
 // app/api/admin/trader/[id]/status/route.ts
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
+
+
 
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
 ): Promise<Response> {
+  await csrfProtect();
   const admin = await requireAdmin();
 
   // 🔒 Proper Response return

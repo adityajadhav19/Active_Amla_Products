@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+
+
 export const dynamic = "force-dynamic";
 export default async function UserLayout({
   children,
@@ -12,5 +14,10 @@ export default async function UserLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return( <>
+  {children}
+  </>
+
+  );
+
 }

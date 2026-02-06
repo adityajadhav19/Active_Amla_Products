@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
+
 
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> } // ✅ Next 15 correct type
 ) {
-  // 🔐 Admin validation
+  await csrfProtect(); 
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,6 +35,7 @@ export async function PATCH(
   }
 
   try {
+ 
     await prisma.product.update({
       where: { id: productId },
       data: { isActive },

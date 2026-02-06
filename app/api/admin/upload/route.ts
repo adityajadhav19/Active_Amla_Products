@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { UploadApiResponse } from "cloudinary";
 import { csrfProtect } from "@/lib/csrf-protect";
+
 export async function POST(req: Request) {
    const admin = await requireAdmin();
     try {

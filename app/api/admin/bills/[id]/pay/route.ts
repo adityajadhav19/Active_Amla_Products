@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 /* ================= GET ALL BILLS (ADMIN) ================= */
 export async function GET() {
@@ -32,6 +33,7 @@ export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> } // ✅ NEXT 15 FIX
 ) {
+  await csrfProtect(); 
   const user = await getAuthUser();
 
   if (!user || user.role !== "ADMIN") {

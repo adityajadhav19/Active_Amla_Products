@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 const ORDER_STATUSES = {
   REQUESTED: "REQUESTED",
@@ -14,6 +15,7 @@ export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  await csrfProtect(); 
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

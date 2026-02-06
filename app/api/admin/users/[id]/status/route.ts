@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
+  await csrfProtect();
   const admin = await requireAdmin();
 
   // 🔐 Proper auth response

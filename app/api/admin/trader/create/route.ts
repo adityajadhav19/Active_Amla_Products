@@ -6,6 +6,7 @@ import { csrfProtect } from "@/lib/csrf-protect";
 
 
 export async function POST(req: Request): Promise<Response> {
+  await csrfProtect();
   // 🔐 Admin check
   const admin = await requireAdmin();
   if (!admin) {
@@ -16,7 +17,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   try {
-    await csrfProtect();
+    
     const { name, email, phone, password } = await req.json();
 
     // 1️⃣ Validation

@@ -7,7 +7,7 @@ import IndiaFestivalBanner from "@/components/effects/IndianFestivalBanner"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import SeasonalEffects from "@/components/effects/SeasonalEffect" // ✅ ADD
-
+import CSRFInit from "@/components/CSRFInit";
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -72,7 +72,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        
+        <CSRFInit /> 
         {/* 🌟 Seasonal / Festival Effects */}
         <SeasonalEffects />
         <IndiaFestivalBanner/>

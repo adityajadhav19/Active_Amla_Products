@@ -2,11 +2,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> } // ✅ Next 15 fix
 ) {
+  csrfProtect(); 
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json(

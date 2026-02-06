@@ -1,4 +1,3 @@
-
 function getCSRFTokenFromCookie() {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(^| )csrf_token=([^;]+)/);
@@ -17,10 +16,8 @@ export async function fetchWithCSRF(
     credentials: "include",
     headers: {
       ...(init.headers || {}),
-      "x-csrf-token": token || "",
+      ...(token ? { "x-csrf-token": token } : {}),
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
     },
   });
 }
-
-

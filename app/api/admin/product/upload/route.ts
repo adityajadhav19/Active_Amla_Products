@@ -2,11 +2,12 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+
 import { UploadApiResponse } from "cloudinary";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { requireAdmin } from "@/lib/auth";
-
+import { csrfProtect } from "@/lib/csrf-protect";
 
 /* ---------------- CLOUDINARY CONFIG ---------------- */
 
@@ -24,15 +25,13 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 /* ---------------- POST ---------------- */
 
 export async function POST(req: Request) {
+  await csrfProtect(); 
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
- 
-
   try {
-
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 

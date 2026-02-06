@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Award, Users, Leaf, Heart, Clock, MapPin } from "lucide-react"
+import { Award, Users, Leaf, Heart, Clock } from "lucide-react"
 import WhatsAppButton from "@/components/whatsapp-button"
 
 export const metadata = {
@@ -18,6 +18,8 @@ export default function AboutPage() {
     { year: "2017", title: "Digital Presence", description: "Launched our online presence and started serving customers across India." },
     { year: "2025", title: "New Generation", description: "Second generation joins the business, bringing fresh ideas while preserving our heritage." },
   ]
+
+  const description = "Active Products is a family-run business with a legacy of over 16 years in crafting premium Amla products. Founded by Mr. & Mrs. Jadhav in 2010, we are committed to quality, tradition, and community support. Our journey from a small processing unit in Maharashtra to serving customers across India is a testament to our dedication and passion for bringing the finest Amla products to you. 🌿"
 
   const values = [
     { icon: <Leaf className="w-8 h-8 text-green-600 dark:text-emerald-400" />, title: "100% Natural", description: "We use only natural ingredients without any artificial preservatives or colors." },
@@ -49,7 +51,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
               A Legacy of <span className="text-green-600 dark:text-emerald-400">Health & Tradition</span>
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">Our journey began in Maharashtra.</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">{description}</p>
 
             <div className="grid grid-cols-2 gap-6 pt-4">
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">

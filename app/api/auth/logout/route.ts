@@ -1,15 +1,27 @@
 import { NextResponse } from "next/server";
+import { csrfProtect } from "@/lib/csrf-protect";
 
-export async function POST() {
-  const res = NextResponse.json({ success: true });
+export async function POST(): Promise<Response> {
+  try {
+    // 🔐 Prevent cross-site logout attacks
+    await csrfProtect();
 
-  res.cookies.set("auth_token", "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
+    const res = NextResponse.json({ success: true });
 
-  return res;
+    // 🍪 Clear auth cookie
+    res.cookies.set("auth_token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
+
+    return res;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid CSRF token" },
+      { status: 403 }
+    );
+  }
 }

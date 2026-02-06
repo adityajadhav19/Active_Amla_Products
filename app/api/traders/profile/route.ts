@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { csrfProtect } from "@/lib/csrf-protect";
 
 /* ---------------- UTILS ---------------- */
 function isValidMapLink(url: string) {
@@ -49,6 +50,9 @@ export async function GET() {
 
 /* ---------------- UPDATE PROFILE ---------------- */
 export async function PATCH(req: Request) {
+
+  await csrfProtect();
+
   const user = await getAuthUser();
 
   if (!user || user.role !== "TRADER") {
