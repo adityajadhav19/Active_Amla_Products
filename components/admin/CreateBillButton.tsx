@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 type Props = {
   orderId: number;
   onSuccess?: () => void;
@@ -35,7 +35,7 @@ export default function CreateBillButton({ orderId, onSuccess }: Props) {
 
     setLoading(true);
 
-    const res = await fetch("/api/admin/bills", {
+    const res = await fetchWithCSRF("/api/admin/bills", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
