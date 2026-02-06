@@ -25,6 +25,7 @@ export default function Profile() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState<AddressForm>({
     addressLine1: "",
@@ -69,27 +70,34 @@ export default function Profile() {
   }
 
   /* ---------- CHANGE PASSWORD ---------- */
-
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
     setLoading(true);
 
     const res = await fetchWithCSRF("/api/traders/change-password", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ oldPassword, newPassword }),
-      credentials: "include",
     });
 
-    if (res.ok) {
-      alert("Password changed. Please login again.");
-      window.location.href = "/login";
-    } else {
-      alert("Failed to change password");
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || "Failed to change password");
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    alert("Password changed. Please login again.");
+    window.location.href = "/login";
   }
+
 
   useEffect(() => {
     fetchProfile();
@@ -132,6 +140,10 @@ export default function Profile() {
           required
           className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600"
         />
+        {error && (
+          <p className="text-red-600 text-sm">{error}</p>
+        )}
+
 
         <button
           disabled={loading}

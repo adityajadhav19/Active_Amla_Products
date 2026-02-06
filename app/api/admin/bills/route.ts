@@ -38,7 +38,7 @@ export async function GET() {
 /* ---------------- CREATE BILL (ADMIN) ---------------- */
 
 export async function POST(req: Request) {
-  
+  await csrfProtect();
   const admin = await requireAdmin();
 
   if (!admin) {
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await csrfProtect();
+    
     const {
       orderId,
       baseAmount,
