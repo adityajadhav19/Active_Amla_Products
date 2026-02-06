@@ -1,6 +1,8 @@
 "use client";
 
+import { fetchWithCSRF } from "@/lib/fetchWithCSRF";
 import { useEffect, useState } from "react";
+
 
 type Bill = {
   id: number;
@@ -90,9 +92,9 @@ export default function Bills() {
           {bill.status === "UNPAID" && (
             <button
               onClick={async () => {
-                const res = await fetch(
+                const res = await fetchWithCSRF(
                   `/api/traders/bills/${bill.id}/pay`,
-                  { method: "PATCH", credentials: "include" }
+                  { method: "PATCH" }
                 );
 
                 if (res.ok) {
@@ -105,14 +107,15 @@ export default function Bills() {
             >
               Mark as Paid
             </button>
+
           )}
 
           {/* FOOTER */}
           <div className="flex justify-between items-center pt-2">
             <span
               className={`text-xs px-2 py-1 rounded ${bill.status === "PAID"
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
                 }`}
             >
               {bill.status === "PAID" ? "Paid" : "Pending"}
