@@ -97,7 +97,7 @@ export default function LoginPage() {
               className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
             />
             <Link
-              href="/forgot-password"
+              href="/forget-password"
               className="text-sm text-green-600 hover:underline text-right block"
             >
               Forgot Password?
