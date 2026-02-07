@@ -74,7 +74,7 @@ export default function Navbar() {
     await fetchWithCSRF("/api/auth/logout", { method: "POST" })
     setUser(null)
     setIsOpen(false)
-    router.push("/login")
+    router.push("/")
   }
 
   return (

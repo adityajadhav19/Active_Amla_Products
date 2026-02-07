@@ -23,23 +23,27 @@ model Bill {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  phone        String?
-  password     String
-  role         Role     @default(USER)
-  city         String?
-  addressLine1 String?
-  addressLine2 String?
-  state        String?
-  pincode      String?
-  mapLink      String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  traderOrders Order[]  @relation("TraderOrders")
-  userOrders   Order[]  @relation("UserOrders")
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  phone          String?
+  password       String
+  role           Role     @default(USER)
+  city           String?
+  addressLine1   String?
+  addressLine2   String?
+  state          String?
+  pincode        String?
+  mapLink        String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  traderOrders   Order[]  @relation("TraderOrders")
+  userOrders     Order[]  @relation("UserOrders")
+
+  // 🔥 REQUIRED for Password Reset relation
+  passwordResets PasswordReset[]
 }
 
 model Product {
@@ -66,6 +70,7 @@ model Order {
   totalAmount Float?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
   bill        Bill?
   trader      User?       @relation("TraderOrders", fields: [traderId], references: [id])
   user        User?       @relation("UserOrders", fields: [userId], references: [id])
@@ -88,6 +93,14 @@ model ContactMessage {
   email     String
   message   String
   createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
